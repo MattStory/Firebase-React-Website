@@ -1,0 +1,17 @@
+.financials_main {
+    position: center;
+    width: 80%;
+    height: 80%;
+    margin-top: 30%;
+    margin-left: 10%;
+    margin-right: 10%;
+    background-color: rgba(242, 242, 242, 0.8);
+}
+
+.mt-10 {
+    margin-top: 10%;
+}
+
+.mb-10 {
+    margin-bottom: 10%;
+}
