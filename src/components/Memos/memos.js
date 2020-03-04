@@ -41,7 +41,7 @@ class Memos extends Component {
 //        console.log("UID", this.props.auth.uid);
         if (this.props.memos !== undefined) {
           data = this.props.memos.filter( memo => {
-             return this.props.auth.uid == memo.uid
+             return this.props.auth.uid === memo.uid
          });
         }
 

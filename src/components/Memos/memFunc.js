@@ -8,7 +8,7 @@ import {deleteMemo} from '../../store/actions/memActions'
 
 
 const MemFunc = (props) => {
-    console.log(props);
+    //console.log(props);
     const {data} = props;
 
    const handleClick = (id) => {
