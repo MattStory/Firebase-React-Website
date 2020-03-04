@@ -26,6 +26,10 @@ class Memos extends Component {
     handelSubmit = (event) => {
         event.preventDefault();
         this.props.creatememo(this.state);
+        this.setState ({
+            title : "",
+            content: ""
+        })
     }
 
     
@@ -48,11 +52,11 @@ class Memos extends Component {
                 <h5 className ="grey-text text-darken-3">Create Memos</h5>
                 <div id = "title" className = "input-field">
                     <label htmlFor="title">Title</label>
-                    <input type ="text" id="title"onChange ={this.handleChange}/>
+                    <input type ="text" id="title" onChange ={this.handleChange} value={this.state.title}/>
                 </div>
                 <div className = "input-field">
                     <label htmlFor="content">Content</label>
-                    <textarea  id="content"  className="materialize-textarea" onChange ={this.handleChange}></textarea>
+                    <textarea  id="content"  className="materialize-textarea" onChange ={this.handleChange} value={this.state.content}></textarea>
                 </div>
                 <div className ="input-field">
                     <button className = "btn green lighten-1 z-depth-0">Create</button>
