@@ -26,8 +26,8 @@ class CreateEditTransaction extends Component {
                         <label htmlFor={'amount'}>Amount</label>
                     </div>
                     <div className={"input-field"}>
-                        <input type={"date"} id={'transactionDateTime'} required={true} onChange={this.handleChange}/>
-                        <label htmlFor={'transactionDateTime'}>Date</label>
+                        <input type={"date"} id={'transactionDate'} required={true} onChange={this.handleChange}/>
+                        <label htmlFor={'transactionDate'}>Date</label>
                     </div>
                     <div className={"input-field"}>
                         <input type={"text"} id={'merchant'} required={true} onChange={this.handleChange}/>

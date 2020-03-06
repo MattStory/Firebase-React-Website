@@ -11,8 +11,7 @@ export const createTransaction = (transaction, history) => {
         docRef.get().then(function(doc) {
             if (!doc.exists) {
                 docRef.set({
-                    owner: profile.firstName + ' ' + profile.lastName,
-                    uid: userId
+                    owner: profile.firstName + ' ' + profile.lastName
                 })
             }
 

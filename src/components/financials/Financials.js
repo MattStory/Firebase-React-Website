@@ -178,17 +178,7 @@ class Financials extends Component{
 }
 
 const mapStateToProps = (state) =>{
-    // console.log(state);
-    // if(typeof state.firestore.ordered.funds == 'undefined'){
-    //     console.log('invalid');
-    //     return {};
-    // }
-    // else{
-    //     console.log('valid');
-    //     return {
-    //         funds: state.firestore.ordered.funds
-    //     };
-    // }
+    //console.log(state);
     return {
         funds: state.firestore.ordered.funds,
         auth: state.firebase.auth
