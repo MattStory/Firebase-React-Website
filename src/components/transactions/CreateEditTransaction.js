@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, {Component, withRouter} from "react";
 import {connect} from "react-redux";
 import {createTransaction} from "../../store/actions/transactionActions"
 import Select from 'react-select';
@@ -13,7 +13,7 @@ class CreateEditTransaction extends Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        this.props.createTransaction(this.state);
+        this.props.createTransaction(this.state, this.props.history);
     };
 
     render() {
@@ -25,9 +25,9 @@ class CreateEditTransaction extends Component {
                         <input type={"number"} id={'amount'} required={true} onChange={this.handleChange}/>
                         <label htmlFor={'amount'}>Amount</label>
                     </div>
-                    <label style={{"fontSize": "15px"}}>Transaction DateTime</label>
                     <div className={"input-field"}>
                         <input type={"date"} id={'transactionDateTime'} required={true} onChange={this.handleChange}/>
+                        <label htmlFor={'transactionDateTime'}>Date</label>
                     </div>
                     <div className={"input-field"}>
                         <input type={"text"} id={'merchant'} required={true} onChange={this.handleChange}/>
@@ -44,7 +44,7 @@ class CreateEditTransaction extends Component {
 
 const mapDispatchToProps = (dispatch) => {
     return{
-        createTransaction: (transaction) => dispatch(createTransaction(transaction))
+        createTransaction: (transaction, history) => dispatch(createTransaction(transaction, history))
     }
 };
 

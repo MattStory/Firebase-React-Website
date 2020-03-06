@@ -1,4 +1,6 @@
-export const createTransaction = (transaction) => {
+import {withRouter} from "react-router-dom";
+
+export const createTransaction = (transaction, history) => {
     return (dispatch, getState, {getFirebase, getFirestore} ) => {
         const firestore = getFirestore();
         const userId = getState().firebase.auth.uid;
@@ -26,7 +28,8 @@ export const createTransaction = (transaction) => {
                 dispatch({ type: 'CREATE_FUND_ERR'}, err);
                 alert("Create transaction failed.\n" + err.message);
             })
-
+        }).then((response) =>{
+            history.push('/transactions')
         }).catch(function(error) {
             console.log("Error getting document:", error);
         });
