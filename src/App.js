@@ -12,6 +12,7 @@ import createFund from './components/financials/CreateFund'
 import reset from './components/auth/reset'
 import Memos from './components/Memos/memos';
 import Transactions from "./components/transactions/Transactions";
+import CreateEditTransaction from "./components/transactions/CreateEditTransaction";
 
 class App extends Component {
   render(){
@@ -27,6 +28,7 @@ class App extends Component {
        <Route path ='/create' component ={CreateProject}/>
        <Route path ='/financials' component ={Financials}/>
        <Route path ='/transactions' component={Transactions}/>
+       <Route path ='/create_edit_transaction' component={CreateEditTransaction}/>
        <Route path ='/profile' component ={Profile}/>
        <Route path ='/createFund' component ={createFund}/>
        <Route path ='/reset' component ={reset}/>
