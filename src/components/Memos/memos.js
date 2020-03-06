@@ -89,7 +89,10 @@ const mapDispatchToProps = (dispatch) => {
 //export default connect(matchStatetoProps , mapDispatchToProps)(Memos);
 export default compose(
     connect(mapStateToProps, mapDispatchToProps),
-    firestoreConnect([
-        {collection: 'memos'}
+    firestoreConnect(props => [
+        {
+            collection: 'memos',
+            where: ['uid', '==', props.auth.uid]
+        }
     ])
 )(Memos)
