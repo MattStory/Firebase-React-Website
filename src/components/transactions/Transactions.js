@@ -47,14 +47,17 @@ const mapStateToProps = (state) =>{
 export default compose(
     connect(mapStateToProps),
     firestoreConnect(props => {
-        console.log(props)
-        return [
-            {
-                collection: 'transactions',
-                doc: props.auth.uid,
-                subcollections: [{ collection: 'userTransactions' }],
-                storeAs: 'transactions'
-            }
-        ]
+        if (typeof props.auth.uid != "undefined"){
+            return [
+                {
+                    collection: 'transactions',
+                    doc: props.auth.uid,
+                    subcollections: [{ collection: 'userTransactions' }],
+                    storeAs: 'transactions'
+                }
+            ]
+        } else {
+            return []
+        }
     })
 )(Transactions)
