@@ -9,6 +9,19 @@ import TransactionList from "./TransactionList";
 
 class Transactions extends Component{
 
+    handleExport = (e) => {
+        e.preventDefault()
+        let dataStr = JSON.stringify(this.props.transactions);
+        let dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+        let exportFileDefaultName = 'data.json';
+
+        let linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+    }
+
     render() {
         return(
             <div className={"container mt-10"}>
@@ -16,6 +29,7 @@ class Transactions extends Component{
                     <div className={"container center"}>
                         <div className={"row"}>
                             <Link to={"/create_edit_transaction"} className={"btn green lighten-1 center mt-10 mb-10"}>New Transaction</Link>
+                            <button className={"btn green lighten-1"} onClick={this.handleExport}>Export...</button>
                         </div>
                     </div>
                 </div>
