@@ -58,8 +58,8 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 export default compose(
-    connect(null,mapDispatchToProps),
-    firestoreConnect([
-        {collection: 'memos'}
-    ])
+    connect(null,mapDispatchToProps)
+    // firestoreConnect([
+    //     {collection: 'memos'}
+    // ])
 )(MemFunc)

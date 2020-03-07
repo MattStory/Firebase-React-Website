@@ -59,8 +59,8 @@ class Financials extends Component{
     }
 
     render() {
-        const {auth} =this.props;
-        if(!auth.uid) return <Redirect to= '/signin'/>
+        const {auth} = this.props;
+        if(!auth.uid) return <Redirect to= '/signin'/>;
         // console.log(this.props);
         // console.log(this.state);
         // console.log('render');
@@ -178,17 +178,7 @@ class Financials extends Component{
 }
 
 const mapStateToProps = (state) =>{
-    // console.log(state);
-    // if(typeof state.firestore.ordered.funds == 'undefined'){
-    //     console.log('invalid');
-    //     return {};
-    // }
-    // else{
-    //     console.log('valid');
-    //     return {
-    //         funds: state.firestore.ordered.funds
-    //     };
-    // }
+    //console.log(state);
     return {
         funds: state.firestore.ordered.funds,
         auth: state.firebase.auth
