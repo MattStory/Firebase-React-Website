@@ -10,7 +10,8 @@ import Profile from './components/profile/profile'
 import Financials from './components/financials/Financials'
 import createFund from './components/financials/CreateFund'
 import reset from './components/auth/reset'
-import Memos from './components/Memos/memos';
+import Memos from './components/Memos/memos'
+import Messages from './components/messaging/messages'
 
 class App extends Component {
   render(){
@@ -28,7 +29,8 @@ class App extends Component {
        <Route path ='/profile' component ={Profile}/>
        <Route path ='/createFund' component ={createFund}/>
        <Route path ='/reset' component ={reset}/>
-       <Route parth='/memos' component={Memos}/>
+       <Route path='/memos' component={Memos}/>
+       <Route path='/messages' component={Messages}/>
      </Switch>
     </div>
     </BrowserRouter>
