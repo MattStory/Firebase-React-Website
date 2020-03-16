@@ -3,9 +3,8 @@ import {connect} from 'react-redux'
 import {firestoreConnect} from 'react-redux-firebase'
 import {compose} from 'redux'
 import {Link, Redirect} from "react-router-dom";
-import {components} from "react-select";
-import CreateEditTransaction from "./CreateEditTransaction";
-import TransactionList from "./TransactionList";
+import './Transactions.css'
+import materialize from 'materialize-css'
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -73,6 +72,34 @@ const cellEdit = {
 };
 
 class Transactions extends Component {
+    constructor(props, context) {
+        super(props, context);
+        this.state = { open: false };
+        this.openExportPopup = this.openExportPopup.bind(this);
+        this.closeExportPopup = this.closeExportPopup.bind(this);
+    }
+
+    // For Modal
+    componentDidMount() {
+        const options = {
+            inDuration: 250,
+            outDuration: 250,
+            opacity: 0.5,
+            dismissible: false,
+            startingTop: "4%",
+            endingTop: "10%"
+        };
+        materialize.Modal.init(this.Modal, options)
+    }
+
+    openExportPopup() {
+        this.setState({ open: true })
+    }
+
+    closeExportPopup() {
+        this.setState({ open: false })
+    }
+
     handleExport = (e) => {
         e.preventDefault();
         let dataStr = JSON.stringify(this.props.transactions);
@@ -107,9 +134,45 @@ class Transactions extends Component {
                         null
                     }
                 </div>
-
                 <Link to={"/create_edit_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
-                <button className={"btn green lighten-1"} onClick={this.handleExport}>Export...</button>
+                <button data-target={"optionModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...</button>
+                <div>
+                    <div ref={Modal => {
+                        this.Modal = Modal;
+                    }}
+                         id={"optionModal"}
+                         className={"modal"}>
+                        <div className={"modal-content"}>
+                            <form>
+                                <h4>Export Options</h4>
+                                <div>
+                                    <label>
+                                        <input className={"with-gap"} name={"optionGroup"} id="json" value="json" type="radio" checked/>
+                                        <span>JSON</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label>
+                                        <input className={"with-gap"} name={"optionGroup"} id="csv" value="csv" type="radio"/>
+                                        <span>CSV</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label>
+                                        <input className={"with-gap"} name={"optionGroup"} id="xml" value="xml" type="radio"/>
+                                        <span>XML</span>
+                                    </label>
+                                </div>
+                                <div className={"form-group"}>
+                                    <button className={"btn green lighten-1"} onClick={this.handleExport}>Export</button>
+                                    <a className="modal-close btn-flat">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
