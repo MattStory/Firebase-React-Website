@@ -5,6 +5,7 @@ import {compose} from 'redux'
 import {Link, Redirect} from "react-router-dom";
 import './Transactions.css'
 import materialize from 'materialize-css'
+import {exportCSV, exportJSON} from "./exportTransactions";
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -72,13 +73,6 @@ const cellEdit = {
 };
 
 class Transactions extends Component {
-    constructor(props, context) {
-        super(props, context);
-        this.state = { open: false };
-        this.openExportPopup = this.openExportPopup.bind(this);
-        this.closeExportPopup = this.closeExportPopup.bind(this);
-    }
-
     // For Modal
     componentDidMount() {
         const options = {
@@ -92,26 +86,31 @@ class Transactions extends Component {
         materialize.Modal.init(this.Modal, options)
     }
 
-    openExportPopup() {
-        this.setState({ open: true })
-    }
-
-    closeExportPopup() {
-        this.setState({ open: false })
-    }
-
     handleExport = (e) => {
         e.preventDefault();
-        let dataStr = JSON.stringify(this.props.transactions);
-        let dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        switch (this.state.exportOption) {
+            case 'json':
+                this.handleExportJSON();
+                break;
+            case 'csv':
+                this.handleExportCSV();
+                break;
+        }
+    };
 
-        let exportFileDefaultName = 'data.json';
-
-        let linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
+    handleExportJSON(){
+        exportJSON(this.props.transactions)
     }
+
+    handleExportCSV(){
+        exportCSV(this.props.transactions)
+    }
+
+    handleExportOptionChange = (e) => {
+        this.setState({
+            exportOption: e.target.value
+        });
+    };
 
 
     render() {
@@ -147,19 +146,19 @@ class Transactions extends Component {
                                 <h4>Export Options</h4>
                                 <div>
                                     <label>
-                                        <input className={"with-gap"} name={"optionGroup"} id="json" value="json" type="radio" checked/>
+                                        <input className={"with-gap"} name={"optionGroup"} id="json" value="json" type="radio" onChange={this.handleExportOptionChange}/>
                                         <span>JSON</span>
                                     </label>
                                 </div>
                                 <div>
                                     <label>
-                                        <input className={"with-gap"} name={"optionGroup"} id="csv" value="csv" type="radio"/>
+                                        <input className={"with-gap"} name={"optionGroup"} id="csv" value="csv" onChange={this.handleExportOptionChange} type="radio"/>
                                         <span>CSV</span>
                                     </label>
                                 </div>
                                 <div>
                                     <label>
-                                        <input className={"with-gap"} name={"optionGroup"} id="xml" value="xml" type="radio"/>
+                                        <input className={"with-gap"} name={"optionGroup"} id="xml" value="xml" onChange={this.handleExportOptionChange} type="radio"/>
                                         <span>XML</span>
                                     </label>
                                 </div>
