@@ -95,6 +95,8 @@ class Transactions extends Component {
             case 'csv':
                 this.handleExportCSV();
                 break;
+            default:
+                break;
         }
     };
 
@@ -156,16 +158,10 @@ class Transactions extends Component {
                                         <span>CSV</span>
                                     </label>
                                 </div>
-                                <div>
-                                    <label>
-                                        <input className={"with-gap"} name={"optionGroup"} id="xml" value="xml" onChange={this.handleExportOptionChange} type="radio"/>
-                                        <span>XML</span>
-                                    </label>
-                                </div>
                                 <div className={"form-group"}>
                                     <button className={"btn green lighten-1"} onClick={this.handleExport}>Export</button>
                                     <a className="modal-close btn-flat">
-                                        Cancel
+                                        Close
                                     </a>
                                 </div>
                             </form>
