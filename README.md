@@ -1,3 +1,5 @@
+WORK DISTRIBUTION GOOGLE SHEET: https://docs.google.com/spreadsheets/d/1EJCCSKpmc4rCXlllzUNjBB28W9tCX3ZIpVv7tfuJUsw/edit?usp=sharing
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

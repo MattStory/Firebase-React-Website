@@ -8,7 +8,7 @@ import {deleteMemo} from '../../store/actions/memActions'
 
 
 const MemFunc = (props) => {
-    console.log(props);
+    //console.log(props);
     const {data} = props;
 
    const handleClick = (id) => {
@@ -58,8 +58,8 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 export default compose(
-    connect(null,mapDispatchToProps),
-    firestoreConnect([
-        {collection: 'memos'}
-    ])
+    connect(null,mapDispatchToProps)
+    // firestoreConnect([
+    //     {collection: 'memos'}
+    // ])
 )(MemFunc)

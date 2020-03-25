@@ -30,9 +30,9 @@ export const deleteMemo = (mem) => {
         const profile = getState().firebase.profile;
         const userId = getState().firebase.auth.uid;
         firestore.collection('memos').doc(mem).delete().then(() => {
-            dispatch({ type: 'DELTE_DOC', mem });
+            dispatch({ type: 'DELTE_MEM_DOC', mem });
         }).catch((err) => {
-            dispatch({ type: 'CREATE_FUND_ERR'}, err);
+            dispatch({ type: 'CREATE_MEM_ERR'}, err);
         })
     }
 };

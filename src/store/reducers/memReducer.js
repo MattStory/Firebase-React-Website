@@ -10,7 +10,10 @@ const memReducer = (state = InitState, action) => {
     if (action.type === "CREATE_MEM") {
         console.log("Memo Created");
         return state;
-    }        
+    } else if (action.type === "DELTE_MEM_DOC") {
+        console.log("Memo Deleted");
+        return state;
+    }
     return state;
 }
 

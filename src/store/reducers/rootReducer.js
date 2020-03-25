@@ -6,6 +6,8 @@ import {firebaseReducer} from 'react-redux-firebase'
 import updateReducer from './updateReducer'
 import fundReducer from './fundReducer'
 import memReducer from './memReducer';
+import msgReducer from './msgReducer';
+import transactionReducer from "./transactionReducer";
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -15,6 +17,8 @@ const rootReducer = combineReducers({
     firebase: firebaseReducer,
     fund: fundReducer,
     memo: memReducer,
+    messages: msgReducer,
+    transaction: transactionReducer
 });
 
 export default rootReducer
