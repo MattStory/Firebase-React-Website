@@ -3,9 +3,9 @@ import {connect} from 'react-redux'
 import {firestoreConnect} from 'react-redux-firebase'
 import {compose} from 'redux'
 import {Link, Redirect} from "react-router-dom";
-import './Transactions.css'
-import materialize from 'materialize-css'
-import {exportCSV, exportJSON} from "./exportTransactions";
+import {components} from "react-select";
+import CreateEditTransaction from "./CreateEditTransaction";
+import TransactionList from "./TransactionList";
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -31,9 +31,10 @@ const columns = [{
     text: 'Amount',
     sort: true,
     sortFunc: (a, b, order) => {
-        if (order === 'desc') {
+        if(order === 'desc') {
             return a - b;
-        } else {
+        }
+        else {
             return b - a;
         }
     }
@@ -72,108 +73,35 @@ const cellEdit = {
     mode: 'dbclick'
 };
 
-class Transactions extends Component {
-    // For Modal
-    componentDidMount() {
-        const options = {
-            inDuration: 250,
-            outDuration: 250,
-            opacity: 0.5,
-            dismissible: false,
-            startingTop: "4%",
-            endingTop: "10%"
-        };
-        materialize.Modal.init(this.Modal, options)
-    }
-
-    handleExport = (e) => {
-        e.preventDefault();
-        switch (this.state.exportOption) {
-            case 'json':
-                this.handleExportJSON();
-                break;
-            case 'csv':
-                this.handleExportCSV();
-                break;
-            default:
-                break;
-        }
-    };
-
-    handleExportJSON(){
-        exportJSON(this.props.transactions)
-    }
-
-    handleExportCSV(){
-        exportCSV(this.props.transactions)
-    }
-
-    handleExportOptionChange = (e) => {
-        this.setState({
-            exportOption: e.target.value
-        });
-    };
-
-
+class Transactions extends Component{
     render() {
-        return (
-            <div className={"container mt"}>
-                <div className="card z-depth-3">
+        return(
+            <div className={"container mt"}>       
+                <div className ="card z-depth-3">
                     {this.props.transactions != null
                         ?
                         <BootstrapTable
                             keyField="id"
-                            data={this.props.transactions}
-                            columns={columns}
-                            pagination={paginationFactory(paginationOption)}
-                            selectRow={selectRows}
-                            defaultSorted={defaultSorted}
-                            cellEdit={cellEditFactory(cellEdit)}
+                            data={ this.props.transactions }
+                            columns={ columns }
+                            pagination={ paginationFactory(paginationOption) }
+                            selectRow={ selectRows }
+                            defaultSorted={ defaultSorted }
+                            cellEdit={ cellEditFactory(cellEdit) }
                             noDataIndication="Table is Empty"
                         />
                         :
                         null
-                    }
+                    }                    
                 </div>
+
                 <Link to={"/create_edit_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
-                <button data-target={"optionModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...</button>
-                <div>
-                    <div ref={Modal => {
-                        this.Modal = Modal;
-                    }}
-                         id={"optionModal"}
-                         className={"modal"}>
-                        <div className={"modal-content"}>
-                            <form>
-                                <h4>Export Options</h4>
-                                <div>
-                                    <label>
-                                        <input className={"with-gap"} name={"optionGroup"} id="json" value="json" type="radio" onChange={this.handleExportOptionChange}/>
-                                        <span>JSON</span>
-                                    </label>
-                                </div>
-                                <div>
-                                    <label>
-                                        <input className={"with-gap"} name={"optionGroup"} id="csv" value="csv" onChange={this.handleExportOptionChange} type="radio"/>
-                                        <span>CSV</span>
-                                    </label>
-                                </div>
-                                <div className={"form-group"}>
-                                    <button className={"btn green lighten-1"} onClick={this.handleExport}>Export</button>
-                                    <a className="modal-close btn-flat">
-                                        Close
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             </div>
         );
     }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state) =>{
     return {
         transactions: state.firestore.ordered.transactions,
         auth: state.firebase.auth
@@ -183,12 +111,12 @@ const mapStateToProps = (state) => {
 export default compose(
     connect(mapStateToProps),
     firestoreConnect(props => {
-        if (typeof props.auth.uid != "undefined") {
+        if (typeof props.auth.uid != "undefined"){
             return [
                 {
                     collection: 'transactions',
                     doc: props.auth.uid,
-                    subcollections: [{collection: 'userTransactions'}],
+                    subcollections: [{ collection: 'userTransactions' }],
                     storeAs: 'transactions'
                 }
             ]

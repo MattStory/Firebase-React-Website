@@ -10,10 +10,10 @@ const msgReducer = (state = InitState, action) => {
         console.log("message created")
     } else if (action.type === "CREATE_MSG_ERR") {
         console.log("error creating message");
-    } else if (action.type === 'FETCH_MSGS') {
-        console.log("successfully fetched messages");
+    } else if (action.type === 'CLOSE_THREAD') {
+        console.log("successfully closed message thread");
     } else if (action.type === 'FETCH_MSGS_ERR') {
-        console.log("error fetching messages");
+        console.log("error closing message thread");
     }
     return state;
 }

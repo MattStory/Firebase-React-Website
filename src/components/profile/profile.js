@@ -31,7 +31,6 @@ class Profile extends Component {
     render() {
         const {auth} =this.props;
         if(!auth.uid) return <Redirect to= '/signin'/>
-    
         return (
             
             <div className ="container">
@@ -39,7 +38,7 @@ class Profile extends Component {
                 <h5 className ="grey-text text-darken-3">Profile</h5>
                 <div className = "input-field">
                     <label htmlFor="email">Email</label>
-                    <input type ="email" id="email"onChange ={this.handleChange}/>
+                    <input  type ="email" id="email"onChange ={this.handleChange}/>
                 </div>
                 <div className = "input-field">
                     <label htmlFor="phone">Phone Number</label>

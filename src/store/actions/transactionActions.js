@@ -8,12 +8,6 @@ export const createTransaction = (transaction, history) => {
         //check if user's collection has been created
         let docRef = firestore.collection("transactions").doc(userId);
 
-        // transform date format
-        const dtf = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' });
-        let tDate = new Date(transaction.transactionDate);
-
-        transaction['transactionDate'] = dtf.format(tDate);
-
         docRef.get().then(function(doc) {
             if (!doc.exists) {
                 docRef.set({
