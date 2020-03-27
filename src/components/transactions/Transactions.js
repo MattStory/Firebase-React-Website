@@ -73,17 +73,6 @@ const paginationOption = {
     hidePageListOnlyOnePage: true
 };
 
-// Options for when selecting a row
-const selectRows = {
-    mode: 'checkbox',
-    //clickToSelect: true,
-    bgColor: '#68DE11',
-    selectColumnStyle: {
-        backgroundColor: '#68DE11'
-    },
-    //clickToEdit: true
-};
-
 // Set default sorted state to descending by transaction date
 const defaultSorted = [{
     dataField: 'transactionDate',
@@ -154,17 +143,42 @@ class Transactions extends Component {
         }
     };
 
-    render() {
-        let transactions;
-        if (this.props.transactions)
-            transactions = JSON.parse(JSON.stringify(this.props.transactions));
+    handleSelectRow (transactionID) {
+        if (this.state === null || this.state.rowsSelected === undefined){
+            let rowsSelected = [transactionID];
 
-        function afterSaveCell (row, cellName, cellValue, done, props) {
-            console.log(cellValue)
-            console.log(props)
-            //this.props.updateTransaction(cellValue);
+            this.setState({
+                rowsSelected: rowsSelected
+            })
+        } else {
+            // avoid directly modify array in state
+            let rowsSelected = this.state.rowsSelected;
+            rowsSelected.push(transactionID);
+
+            this.setState({
+                rowsSelected: rowsSelected
+            });
         }
+    };
 
+    // Options for when selecting a row
+    // Moved here to access handleSelectRow
+    static get selectRows() {
+        return {
+            mode: 'checkbox',
+            //clickToSelect: true,
+            bgColor: '#68DE11',
+            selectColumnStyle: {
+                backgroundColor: '#68DE11'
+            },
+            onSelect: (row, isSelect, rowIndex, e) => {
+                //this.handleSelectRow(row.id)
+            }
+            //clickToEdit: true
+        }
+    }
+
+    render() {
         return (
             <div className={"container mt"}>
                 <div className="card z-depth-3">
@@ -172,10 +186,21 @@ class Transactions extends Component {
                         ?
                         <BootstrapTable
                             keyField="id"
-                            data={ transactions }
+                            data={ this.props.transactions }
                             columns={ columns }
                             pagination={paginationFactory(paginationOption)}
-                            selectRow={selectRows}
+                            selectRow={{
+                                mode: 'checkbox',
+                                //clickToSelect: true,
+                                bgColor: '#68DE11',
+                                selectColumnStyle: {
+                                    backgroundColor: '#68DE11'
+                                },
+                                onSelect: (row, isSelect, rowIndex, e) => {
+                                    this.handleSelectRow(row.id)
+                                }
+                                //clickToEdit: true
+                            }}
                             defaultSorted={defaultSorted}
                             cellEdit={ cellEditFactory(cellEdit) }
                             noDataIndication="No Transactions"
