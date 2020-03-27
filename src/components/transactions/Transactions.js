@@ -18,8 +18,6 @@ import cellEditFactory, {Type} from 'react-bootstrap-table2-editor';
 // Pagination Module
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
-import {createTransaction} from "../../store/actions/transactionActions";
-import Popup from "reactjs-popup";
 
 const transactionCategory = [
     {value: "Dining", label: "Dining"},
