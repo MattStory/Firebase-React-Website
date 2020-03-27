@@ -2,31 +2,32 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {firestoreConnect} from 'react-redux-firebase'
 import {compose} from 'redux'
-import {Link, Redirect} from "react-router-dom";
+import {Link} from "react-router-dom";
 import './Transactions.css'
 import materialize from 'materialize-css'
 import {exportCSV, exportJSON} from "./exportTransactions";
-import {updateTransaction} from "../../store/actions/transactionActions";
+import {updateTransaction, deleteTransactions} from "../../store/actions/transactionActions";
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 
 // Cell Editing Module (Doesnt work for some reason lol)
-import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
+import cellEditFactory, {Type} from 'react-bootstrap-table2-editor';
 
 // Pagination Module
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 import {createTransaction} from "../../store/actions/transactionActions";
+import Popup from "reactjs-popup";
 
 const transactionCategory = [
-    { value: "Dining", label: "Dining"},
-    { value: "Travel", label: "Travel"},
-    { value: "Tuition", label: "Tuition"},
-    { value: "Grocery", label: "Grocery"},
-    { value: "Bar & Coffee Shop", label: "Bar & Coffee Shop"},
-    { value: "Fee", label: "Fee"}];
+    {value: "Dining", label: "Dining"},
+    {value: "Travel", label: "Travel"},
+    {value: "Tuition", label: "Tuition"},
+    {value: "Grocery", label: "Grocery"},
+    {value: "Bar & Coffee Shop", label: "Bar & Coffee Shop"},
+    {value: "Fee", label: "Fee"}];
 
 // Columns for table
 const columns = [{
@@ -91,11 +92,12 @@ class Transactions extends Component {
             inDuration: 250,
             outDuration: 250,
             opacity: 0.5,
-            dismissible: false,
+            dismissible: true,
             startingTop: "4%",
             endingTop: "10%"
         };
-        materialize.Modal.init(this.Modal, options)
+        materialize.Modal.init(this.deleteModal, options);
+        materialize.Modal.init(this.exportModal, options);
     }
 
     handleExport = (e) => {
@@ -110,6 +112,7 @@ class Transactions extends Component {
             default:
                 break;
         }
+        alert("Transactions exported.")
     };
 
     handleExportJSON() {
@@ -127,14 +130,14 @@ class Transactions extends Component {
     };
 
     onTableChange = (type, newState) => {
-        if (type === "cellEdit"){
+        if (type === "cellEdit") {
             let transactionToUpdate = {
                 "id": newState.cellEdit.rowId,
                 "dataField": newState.cellEdit.dataField,
                 "newValue": newState.cellEdit.newValue
             };
 
-            if (transactionToUpdate['dataField'] === 'transactionDate'){ // format date before entering database
+            if (transactionToUpdate['dataField'] === 'transactionDate') { // format date before entering database
                 let dateParts = transactionToUpdate['newValue'].split("-"); // yyyy-mm-dd
                 transactionToUpdate['newValue'] = dateParts[1] + '/' + dateParts[2] + '/' + dateParts[0];
             }
@@ -143,8 +146,8 @@ class Transactions extends Component {
         }
     };
 
-    handleSelectRow (transactionID) {
-        if (this.state === null || this.state.rowsSelected === undefined){
+    handleSelectRow(transactionID, isSelect) {
+        if (this.state === null || this.state.rowsSelected === undefined) {
             let rowsSelected = [transactionID];
 
             this.setState({
@@ -153,7 +156,15 @@ class Transactions extends Component {
         } else {
             // avoid directly modify array in state
             let rowsSelected = this.state.rowsSelected;
-            rowsSelected.push(transactionID);
+
+            if (isSelect) //on select
+                rowsSelected.push(transactionID);
+            else { //on deselect
+                let indexToRemove = rowsSelected.indexOf(transactionID);
+
+                if (indexToRemove > -1)
+                    rowsSelected.splice(indexToRemove, 1)
+            }
 
             this.setState({
                 rowsSelected: rowsSelected
@@ -161,22 +172,14 @@ class Transactions extends Component {
         }
     };
 
-    // Options for when selecting a row
-    // Moved here to access handleSelectRow
-    static get selectRows() {
-        return {
-            mode: 'checkbox',
-            //clickToSelect: true,
-            bgColor: '#68DE11',
-            selectColumnStyle: {
-                backgroundColor: '#68DE11'
-            },
-            onSelect: (row, isSelect, rowIndex, e) => {
-                //this.handleSelectRow(row.id)
-            }
-            //clickToEdit: true
-        }
-    }
+    handleDeleteTransactions = (e) => {
+        e.preventDefault();
+
+        if (this.state === null || this.state.rowsSelected === undefined || this.state.rowsSelected.length === 0)
+            alert("Oops! No row selected to delete!");
+        else
+            this.props.deleteTransactions(this.state.rowsSelected);
+    };
 
     render() {
         return (
@@ -186,8 +189,8 @@ class Transactions extends Component {
                         ?
                         <BootstrapTable
                             keyField="id"
-                            data={ this.props.transactions }
-                            columns={ columns }
+                            data={this.props.transactions}
+                            columns={columns}
                             pagination={paginationFactory(paginationOption)}
                             selectRow={{
                                 mode: 'checkbox',
@@ -197,27 +200,52 @@ class Transactions extends Component {
                                     backgroundColor: '#68DE11'
                                 },
                                 onSelect: (row, isSelect, rowIndex, e) => {
-                                    this.handleSelectRow(row.id)
+                                    this.handleSelectRow(row.id, isSelect)
                                 }
                                 //clickToEdit: true
                             }}
                             defaultSorted={defaultSorted}
-                            cellEdit={ cellEditFactory(cellEdit) }
+                            cellEdit={cellEditFactory(cellEdit)}
                             noDataIndication="No Transactions"
                             remote={{cellEdit: true}}
-                            onTableChange={ this.onTableChange }
+                            onTableChange={this.onTableChange}
                         />
                         :
                         null
                     }
                 </div>
                 <Link to={"/create_edit_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
-                <button data-target={"optionModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...</button>
+                <button data-target={"exportModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...
+                </button>
+                <button data-target={"deleteModal"} className={"btn modal-trigger green lighten-1"}>Delete...</button>
                 <div>
                     <div ref={Modal => {
-                        this.Modal = Modal;
+                        this.deleteModal = Modal;
                     }}
-                         id={"optionModal"}
+                         id={"deleteModal"}
+                         className={"modal"}>
+                        <div className={"modal-content"}>
+                            <form>
+                                <h4 className={"grey-text text-darken-3"}>Confirm to delete?</h4>
+                                <h6 className={"black-txt"}>This operation is irreversible.</h6>
+                                <div className={"form-group"}>
+                                    <button className={"modal-close btn red lighten-1"}
+                                            onClick={this.handleDeleteTransactions}>Delete
+                                    </button>
+                                    <a className="modal-close btn grey darken-3 white-text"
+                                       style={{"marginLeft": "2%"}}>
+                                        Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div ref={Modal => {
+                        this.exportModal = Modal;
+                    }}
+                         id={"exportModal"}
                          className={"modal"}>
                         <div className={"modal-content"}>
                             <form>
@@ -237,9 +265,11 @@ class Transactions extends Component {
                                     </label>
                                 </div>
                                 <div className={"form-group"}>
-                                    <button className={"btn green lighten-1"} onClick={this.handleExport}>Export
+                                    <button className={"modal-close btn green lighten-1"}
+                                            onClick={this.handleExport}>Export
                                     </button>
-                                    <a className="modal-close btn grey darken-3 white-text" style={{"marginLeft": "2%"}}>
+                                    <a className="modal-close btn grey darken-3 white-text"
+                                       style={{"marginLeft": "2%"}}>
                                         Close
                                     </a>
                                 </div>
@@ -253,8 +283,9 @@ class Transactions extends Component {
 }
 
 const mapDispatchToProps = (dispatch) => {
-    return{
-        updateTransaction: (transactionToUpdate) => dispatch(updateTransaction(transactionToUpdate))
+    return {
+        updateTransaction: (transactionToUpdate) => dispatch(updateTransaction(transactionToUpdate)),
+        deleteTransactions: (transactions) => dispatch(deleteTransactions(transactions))
     }
 };
 
