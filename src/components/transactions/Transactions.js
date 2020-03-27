@@ -182,6 +182,7 @@ class Transactions extends Component {
     };
 
     render() {
+        //console.log(this.props.transactions);
         return (
             <div className={"container mt"}>
                 <div className="card z-depth-3">
