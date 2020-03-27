@@ -1,14 +1,15 @@
-import {withRouter} from "react-router-dom";
-
 export const createTransaction = (transaction, history) => {
-    return (dispatch, getState, {getFirebase, getFirestore} ) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
         const firestore = getFirestore();
         const userId = getState().firebase.auth.uid;
         const profile = getState().firebase.profile;
         //check if user's collection has been created
         let docRef = firestore.collection("transactions").doc(userId);
 
-        docRef.get().then(function(doc) {
+        let dateParts = transaction.transactionDate.split("-"); // yyyy-mm-dd
+        transaction['transactionDate'] = dateParts[1] + '/' + dateParts[2] + '/' + dateParts[0];
+
+        docRef.get().then(function (doc) {
             if (!doc.exists) {
                 docRef.set({
                     owner: profile.firstName + ' ' + profile.lastName
@@ -21,18 +22,60 @@ export const createTransaction = (transaction, history) => {
                 ...transaction,
                 createdAt: new Date()
             }).then(() => {
-                dispatch({ type: 'CREATE_FUND', transaction });
-                alert("Transaction Created");
+                dispatch({type: 'CREATE_FUND', transaction});
+                //alert("Transaction Created");
             }).catch((err) => {
-                dispatch({ type: 'CREATE_FUND_ERR'}, err);
+                dispatch({type: 'CREATE_FUND_ERR'}, err);
                 alert("Create transaction failed.\n" + err.message);
             })
-        }).then((response) =>{
+        }).then((response) => {
             history.push('/transactions')
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.log("Error getting document:", error);
         });
 
 
+    }
+};
+
+export const updateTransaction = (transactionToUpdate) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
+        const firestore = getFirestore();
+        const userId = getState().firebase.auth.uid;
+
+        let docRef = firestore
+            .collection("transactions")
+            .doc(userId)
+            .collection('userTransactions')
+            .doc(transactionToUpdate.id);
+
+        let transactionUpdate = {};
+
+        transactionUpdate[transactionToUpdate.dataField] = transactionToUpdate.newValue;
+
+        docRef.update(transactionUpdate)
+            .catch(function (error) {
+                console.log("Error getting document:", error);
+            });
+    }
+};
+
+export const deleteTransactions = (transactions) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
+        const firestore = getFirestore();
+        const userId = getState().firebase.auth.uid;
+
+        let docRef = firestore
+            .collection("transactions")
+            .doc(userId)
+            .collection('userTransactions');
+
+        transactions.forEach(transaction => {
+            docRef.doc(transaction)
+                .delete()
+                .catch(function (error) {
+                    console.log("Error getting document:", error);
+                })
+        })
     }
 };
