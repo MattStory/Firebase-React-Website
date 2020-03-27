@@ -18,8 +18,34 @@ import "./chart.css";
 import {connect} from 'react-redux'
 import {firestoreConnect} from 'react-redux-firebase'
 import {compose} from 'redux'
+import {convertJson} from "./charData";
 // Adding the chart and theme as dependency to the core fusioncharts
 ReactFC.fcRoot(FusionCharts, Column2D, FusionTheme);
+
+class Chart extends React.Component {
+  
+  render() {
+    let temp = this.props.transactions;
+    console.log(temp);
+    
+    return (
+      <div className = "visualizations">
+      <div className = "chart">
+    <ReactFC {...chartConfigsPie} />);
+    </div>
+    <div className ="chart">
+    <ReactFC {...chartConfigsLineD} />);
+    </div>
+    <div className ="chart">
+    <ReactFC {...chartConfigsLineW} />);
+    </div>
+    <div className ="chart">
+    <ReactFC {...chartConfigsLineM} />);
+    </div>
+    </div>
+    )
+  }
+}
 
 // STEP 2 - Chart Data
 const chartDataPie = [
@@ -56,6 +82,9 @@ const chartDataPie = [
     value: "30"
   }
 ];
+
+
+
 
 // STEP 3 - Creating the JSON object to store the chart configurations
 const chartConfigsPie = {
@@ -162,27 +191,7 @@ const chartConfigsLineM = {
 };
 
 // STEP 4 - Creating the DOM element to pass the react-fusioncharts component
-class Chart extends React.Component {
-  render() {
-    console.log(this.props.transactions);
-    return (
-      <div className = "visualizations">
-      <div className = "chart">
-    <ReactFC {...chartConfigsPie} />);
-    </div>
-    <div className ="chart">
-    <ReactFC {...chartConfigsLineD} />);
-    </div>
-    <div className ="chart">
-    <ReactFC {...chartConfigsLineW} />);
-    </div>
-    <div className ="chart">
-    <ReactFC {...chartConfigsLineM} />);
-    </div>
-    </div>
-    )
-  }
-}
+
 
 const mapStateToProps = (state) => {
   return {
