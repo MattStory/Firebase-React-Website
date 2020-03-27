@@ -6,17 +6,27 @@ import {Link, Redirect} from "react-router-dom";
 import './Transactions.css'
 import materialize from 'materialize-css'
 import {exportCSV, exportJSON} from "./exportTransactions";
+import {updateTransaction} from "../../store/actions/transactionActions";
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 
 // Cell Editing Module (Doesnt work for some reason lol)
-import cellEditFactory from 'react-bootstrap-table2-editor';
+import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 
 // Pagination Module
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
+import {createTransaction} from "../../store/actions/transactionActions";
+
+const transactionCategory = [
+    { value: "Dining", label: "Dining"},
+    { value: "Travel", label: "Travel"},
+    { value: "Tuition", label: "Tuition"},
+    { value: "Grocery", label: "Grocery"},
+    { value: "Bar & Coffee Shop", label: "Bar & Coffee Shop"},
+    { value: "Fee", label: "Fee"}];
 
 // Columns for table
 const columns = [{
@@ -36,11 +46,23 @@ const columns = [{
         } else {
             return b - a;
         }
-    }
+    },
+    type: 'number'
+}, {
+    dataField: 'transactionCategory',
+    text: 'Category',
+    sort: true,
+    editor: {
+        type: Type.SELECT,
+        options: transactionCategory
+    },
+    editorClasses: "browser-default"
 }, {
     dataField: 'transactionDate',
     text: 'Transaction Date',
-    sort: true
+    sort: true,
+    type: 'string',
+    editor: {type: Type.DATE}
 }];
 
 // Page pagination options
@@ -54,12 +76,12 @@ const paginationOption = {
 // Options for when selecting a row
 const selectRows = {
     mode: 'checkbox',
-    clickToSelect: true,
+    //clickToSelect: true,
     bgColor: '#68DE11',
     selectColumnStyle: {
         backgroundColor: '#68DE11'
     },
-    clickToEdit: true
+    //clickToEdit: true
 };
 
 // Set default sorted state to descending by transaction date
@@ -69,7 +91,8 @@ const defaultSorted = [{
 }];
 
 const cellEdit = {
-    mode: 'dbclick'
+    mode: 'click',
+    blurToSave: true
 };
 
 class Transactions extends Component {
@@ -100,11 +123,11 @@ class Transactions extends Component {
         }
     };
 
-    handleExportJSON(){
+    handleExportJSON() {
         exportJSON(this.props.transactions)
     }
 
-    handleExportCSV(){
+    handleExportCSV() {
         exportCSV(this.props.transactions)
     }
 
@@ -114,8 +137,34 @@ class Transactions extends Component {
         });
     };
 
+    onTableChange = (type, newState) => {
+        if (type === "cellEdit"){
+            let transactionToUpdate = {
+                "id": newState.cellEdit.rowId,
+                "dataField": newState.cellEdit.dataField,
+                "newValue": newState.cellEdit.newValue
+            };
+
+            if (transactionToUpdate['dataField'] === 'transactionDate'){ // format date before entering database
+                let dateParts = transactionToUpdate['newValue'].split("-"); // yyyy-mm-dd
+                transactionToUpdate['newValue'] = dateParts[1] + '/' + dateParts[2] + '/' + dateParts[0];
+            }
+
+            this.props.updateTransaction(transactionToUpdate);
+        }
+    };
 
     render() {
+        let transactions;
+        if (this.props.transactions)
+            transactions = JSON.parse(JSON.stringify(this.props.transactions));
+
+        function afterSaveCell (row, cellName, cellValue, done, props) {
+            console.log(cellValue)
+            console.log(props)
+            //this.props.updateTransaction(cellValue);
+        }
+
         return (
             <div className={"container mt"}>
                 <div className="card z-depth-3">
@@ -123,13 +172,15 @@ class Transactions extends Component {
                         ?
                         <BootstrapTable
                             keyField="id"
-                            data={this.props.transactions}
-                            columns={columns}
+                            data={ transactions }
+                            columns={ columns }
                             pagination={paginationFactory(paginationOption)}
                             selectRow={selectRows}
                             defaultSorted={defaultSorted}
-                            cellEdit={cellEditFactory(cellEdit)}
-                            noDataIndication="Table is Empty"
+                            cellEdit={ cellEditFactory(cellEdit) }
+                            noDataIndication="No Transactions"
+                            remote={{cellEdit: true}}
+                            onTableChange={ this.onTableChange }
                         />
                         :
                         null
@@ -145,22 +196,25 @@ class Transactions extends Component {
                          className={"modal"}>
                         <div className={"modal-content"}>
                             <form>
-                                <h4>Export Options</h4>
+                                <h4 className={"grey-text text-darken-3"}>Export Options</h4>
                                 <div>
                                     <label>
-                                        <input className={"with-gap"} name={"optionGroup"} id="json" value="json" type="radio" onChange={this.handleExportOptionChange}/>
+                                        <input className={"with-gap"} name={"optionGroup"} id="json" value="json"
+                                               type="radio" onChange={this.handleExportOptionChange}/>
                                         <span>JSON</span>
                                     </label>
                                 </div>
                                 <div>
                                     <label>
-                                        <input className={"with-gap"} name={"optionGroup"} id="csv" value="csv" onChange={this.handleExportOptionChange} type="radio"/>
+                                        <input className={"with-gap"} name={"optionGroup"} id="csv" value="csv"
+                                               onChange={this.handleExportOptionChange} type="radio"/>
                                         <span>CSV</span>
                                     </label>
                                 </div>
                                 <div className={"form-group"}>
-                                    <button className={"btn green lighten-1"} onClick={this.handleExport}>Export</button>
-                                    <a className="modal-close btn-flat">
+                                    <button className={"btn green lighten-1"} onClick={this.handleExport}>Export
+                                    </button>
+                                    <a className="modal-close btn grey darken-3 white-text" style={{"marginLeft": "2%"}}>
                                         Close
                                     </a>
                                 </div>
@@ -173,6 +227,12 @@ class Transactions extends Component {
     }
 }
 
+const mapDispatchToProps = (dispatch) => {
+    return{
+        updateTransaction: (transactionToUpdate) => dispatch(updateTransaction(transactionToUpdate))
+    }
+};
+
 const mapStateToProps = (state) => {
     return {
         transactions: state.firestore.ordered.transactions,
@@ -181,7 +241,7 @@ const mapStateToProps = (state) => {
 };
 
 export default compose(
-    connect(mapStateToProps),
+    connect(mapStateToProps, mapDispatchToProps),
     firestoreConnect(props => {
         if (typeof props.auth.uid != "undefined") {
             return [
