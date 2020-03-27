@@ -14,7 +14,7 @@ import Column2D from "fusioncharts/fusioncharts.charts";
 
 // Include the theme as fusion
 import FusionTheme from "fusioncharts/themes/fusioncharts.theme.fusion";
-import "./chart.css";
+
 import {connect} from 'react-redux'
 import {firestoreConnect} from 'react-redux-firebase'
 import {compose} from 'redux'
@@ -35,6 +35,7 @@ class Chart extends React.Component {
   render() {
     // Pie Chart
     const amount = this.props.transactions;
+    let myMap = new Map();
     const chartDataPie =[];
     // Array of months
     var month = new Array();
@@ -54,32 +55,128 @@ class Chart extends React.Component {
 
     const byDay =[
       {
-        label: "Sunday",
-        value : 0,
+        label: "1",
+        value: 0,
       },
       {
-        label: "Monday",
-        value : 0,
+        label: "2",
+        value: 0,
       },
       {
-        label: "Tuesday",
-        value : 0,
+        label: "3",
+        value: 0,
       },
       {
-        label: "Wednesday",
-        value : 0,
+        label: "4",
+        value: 0,
       },
       {
-        label: "Thursday",
-        value : 0,
+        label: "5",
+        value: 0,
       },
       {
-        label: "Friday",
-        value : 0,
+        label: "6",
+        value: 0,
       },
       {
-        label: "Saturday",
-        value : 0,
+        label: "7",
+        value: 0,
+      },
+      {
+        label: "8",
+        value: 0,
+      },
+      {
+        label: "9",
+        value: 0,
+      },
+      {
+        label: "10",
+        value: 0,
+      },
+      {
+        label: "11",
+        value: 0,
+      },
+      {
+        label: "12",
+        value: 0,
+      },
+      {
+        label: "13",
+        value: 0,
+      },
+      {
+        label: "14",
+        value: 0,
+      },
+      {
+        label: "15",
+        value: 0,
+      },
+      {
+        label: "16",
+        value: 0,
+      },
+      {
+        label: "17",
+        value: 0,
+      },
+      {
+        label: "18",
+        value: 0,
+      },
+      {
+        label: "19",
+        value: 0,
+      },
+      {
+        label: "20",
+        value: 0,
+      },
+      {
+        label: "21",
+        value: 0,
+      },
+      {
+        label: "22",
+        value: 0,
+      },
+      {
+        label: "23",
+        value: 0,
+      },
+      {
+        label: "24",
+        value: 0,
+      },
+      {
+        label: "25",
+        value: 0,
+      },
+      {
+        label: "26",
+        value: 0,
+      },
+      {
+        label: "27",
+        value: 0,
+      },
+      {
+        label: "28",
+        value: 0,
+      },
+      {
+        label: "29",
+        value: 0,
+      },
+      {
+        label: "30",
+        value: 0,
+      },
+      {
+        label: "31",
+        value: 0,
       },
     
       
@@ -136,15 +233,52 @@ class Chart extends React.Component {
       },
 
     ];
+
+    const byWeek = [
+      {
+        label: "Week1",
+        value: 0,
+      },
+      {
+        label: "Week2",
+        value: 0,
+      },
+      {
+        label: "Week3",
+        value: 0,
+      },
+      {
+        label: "Week4",
+        value: 0,
+      },
+    ];
+
+
+
     var currentDate = new Date();
     var current_Month = currentDate.getMonth();
     var current_year = currentDate.getFullYear();
     console.log(current_year);
     if(amount != undefined) {
       console.log(amount)
+
+      for (let i = 0; i < amount.length; i++) {
+        myMap.set(amount[i].merchant, { index: 0 , value: false});
+      }
+
       for (let i = 0; i < amount.length; i++) {
         //console.log(amount[i].amount);
-        chartDataPie[i] = {label: amount[i].merchant, value: amount[i].amount };
+        
+        if (!myMap.get(amount[i].merchant).value) {
+          chartDataPie[i] = {label: amount[i].merchant, value: amount[i].amount };
+        } else {
+  //          console.log ("Before ", parseInt(chartDataPie[myMap.get(amount[i].merchant).index].value) + parseInt(amount[i].amount));
+            chartDataPie[myMap.get(amount[i].merchant).index] = {label: amount[i].merchant, value: (parseInt(chartDataPie[myMap.get(amount[i].merchant).index].value) + parseInt(amount[i].amount))};
+        }
+
+
+
+        myMap.set(amount[i].merchant, {index :i, value : true});
 //        console.log(this.props.transactions[i].transactionDate.getDay())
 
         // For This Months Spending by day
@@ -159,13 +293,25 @@ class Chart extends React.Component {
         // console.log(day, month[current_Month + 1]);
         // console.log(day, month[dt[1]]);
         if (month[current_Month + 1] == month[dt[1]] ) {
-          byDay[day].value += parseInt(amount[i].amount);
+          byDay[dt[2] - 1].value += parseInt(amount[i].amount);
         }
 
         if (current_year == dt[0]) {
          byMonth[date.getMonth()].value += parseInt(amount[i].amount); 
         }
+
+        if (dt[2] - 1 < 7) {
+          byWeek[0].value += amount[i].amount;
+        } else if (dt[2] - 1 > 7 && dt[2] - 1 < 14) {
+          byWeek[1].value = amount[i].amount;
+        } else if (dt[2] - 1 > 14 && dt[2] - 1 < 21) {
+          byWeek[2].value = amount[i].amount;
+        } else {
+          byWeek[3].value = amount[i].amount;
+        }
       }
+
+   
 
     }
     if (this.props.transactions != undefined){
@@ -269,7 +415,7 @@ const chartConfigsLineW = {
       theme: "fusion"
     },
     // Chart Data
-    data: chartDataPie
+    data: byWeek
   }
 };
 
