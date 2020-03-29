@@ -60,10 +60,13 @@ class CreateTransaction extends Component {
     handleFinancialAcctChange = (e) => {
         let acctBalance = 0;
 
-        this.props.userFunds.forEach(fund => {
-            if (fund.id === e.value)
-                acctBalance = fund.balance
-        });
+        // add original account balance to state for fund update
+        for (let i = 0; i < this.props.userFunds.length; i++){
+            if (this.props.userFunds[i].id === e.value){
+                acctBalance = this.props.userFunds[i].balance;
+                break;
+            }
+        }
 
         this.setState({
             financialAcct: e.value,

@@ -27,43 +27,6 @@ const transactionCategory = [
     {value: "Bar & Coffee Shop", label: "Bar & Coffee Shop"},
     {value: "Fee", label: "Fee"}];
 
-// Columns for table
-const columns = [{
-    dataField: 'id',
-    hidden: true
-}, {
-    dataField: 'merchant',
-    text: 'Merchant',
-    sort: true
-}, {
-    dataField: 'amount',
-    text: 'Amount',
-    sort: true,
-    sortFunc: (a, b, order) => {
-        if (order === 'desc') {
-            return a - b;
-        } else {
-            return b - a;
-        }
-    },
-    type: 'number'
-}, {
-    dataField: 'transactionCategory',
-    text: 'Category',
-    sort: true,
-    editor: {
-        type: Type.SELECT,
-        options: transactionCategory
-    },
-    editorClasses: "browser-default"
-}, {
-    dataField: 'transactionDate',
-    text: 'Transaction Date',
-    sort: true,
-    type: 'string',
-    editor: {type: Type.DATE}
-}];
-
 // Page pagination options
 const paginationOption = {
     sizePerPage: 10,
@@ -127,23 +90,6 @@ class Transactions extends Component {
         });
     };
 
-    onTableChange = (type, newState) => {
-        if (type === "cellEdit") {
-            let transactionToUpdate = {
-                "id": newState.cellEdit.rowId,
-                "dataField": newState.cellEdit.dataField,
-                "newValue": newState.cellEdit.newValue
-            };
-
-            if (transactionToUpdate['dataField'] === 'transactionDate') { // format date before entering database
-                let dateParts = transactionToUpdate['newValue'].split("-"); // yyyy-mm-dd
-                transactionToUpdate['newValue'] = dateParts[1] + '/' + dateParts[2] + '/' + dateParts[0];
-            }
-
-            this.props.updateTransaction(transactionToUpdate);
-        }
-    };
-
     handleSelectRow(transactionID, isSelect) {
         if (this.state === null || this.state.rowsSelected === undefined) {
             let rowsSelected = [transactionID];
@@ -179,8 +125,94 @@ class Transactions extends Component {
             this.props.deleteTransactions(this.state.rowsSelected);
     };
 
+    onTableChange = (type, newState) => {
+        if (type === "cellEdit") {
+            let transactionToUpdate = {
+                "id": newState.cellEdit.rowId,
+                "dataField": newState.cellEdit.dataField,
+                "newValue": newState.cellEdit.newValue
+            };
+
+            if (transactionToUpdate['dataField'] === 'transactionDate') { // format date before entering database
+                let dateParts = transactionToUpdate['newValue'].split("-"); // yyyy-mm-dd
+                transactionToUpdate['newValue'] = dateParts[1] + '/' + dateParts[2] + '/' + dateParts[0];
+            }
+
+            this.props.updateTransaction(transactionToUpdate);
+        }
+    };
+
+    accountFormatter = (id) => {
+        let targetFund = this.props.userFunds.find(fund => fund.id === id);
+        return (<span>{targetFund.nickname + ' ' + targetFund.fundType}</span>)
+    };
+
+    getAccountOptions = (row) => {
+        console.log(row)
+    }
+
+    // Columns for table, moved here to access class methods
+    columns = [{
+        dataField: 'id',
+        hidden: true
+    }, {
+        dataField: 'merchant',
+        text: 'Merchant',
+        sort: true
+    }, {
+        dataField: 'amount',
+        text: 'Amount',
+        sort: true,
+        sortFunc: (a, b, order) => {
+            if (order === 'desc') {
+                return a - b;
+            } else {
+                return b - a;
+            }
+        },
+        type: 'number'
+    }, {
+        dataField: 'transactionCategory',
+        text: 'Category',
+        sort: true,
+        editor: {
+            type: Type.SELECT,
+            options: transactionCategory
+        },
+        editorClasses: "browser-default"
+    }, {
+        dataField: 'financialAcct',
+        text: 'Account',
+        sort: true,
+        formatter: this.accountFormatter,
+        editor: {
+            type: Type.SELECT,
+            getOptions: (setOptions, { row, column }) => {
+                let userFunds = [];
+                this.props.userFunds.forEach(userFund => {
+                    let formattedFund = {};
+                    let label = userFund.nickname + ' ' + userFund.fundType + ', Balance: $' + userFund.balance;
+                    let value = userFund.id;
+                    formattedFund['label'] = label;
+                    formattedFund['value'] = value;
+
+                    userFunds.push(formattedFund);
+                });
+
+                return userFunds
+            }
+        },
+        editorClasses: "browser-default"
+    }, {
+        dataField: 'transactionDate',
+        text: 'Transaction Date',
+        sort: true,
+        type: 'string',
+        editor: {type: Type.DATE}
+    }
+    ];
+
     render() {
-        //console.log(this.props.transactions);
         return (
             <div className={"container mt"}>
                 <div className="card z-depth-3">
@@ -189,7 +221,7 @@ class Transactions extends Component {
                         <BootstrapTable
                             keyField="id"
                             data={this.props.transactions}
-                            columns={columns}
+                            columns={this.columns}
                             pagination={paginationFactory(paginationOption)}
                             selectRow={{
                                 mode: 'checkbox',
@@ -291,7 +323,8 @@ const mapDispatchToProps = (dispatch) => {
 const mapStateToProps = (state) => {
     return {
         transactions: state.firestore.ordered.transactions,
-        auth: state.firebase.auth
+        auth: state.firebase.auth,
+        userFunds: state.firestore.ordered.userFunds
     };
 };
 
@@ -301,6 +334,12 @@ export default compose(
         if (typeof props.auth.uid != "undefined") {
             return [
                 {
+                    collection: 'funds',
+                    where: [
+                        ['uid', '==', props.auth.uid]
+                    ],
+                    storeAs: 'userFunds'
+                }, {
                     collection: 'transactions',
                     doc: props.auth.uid,
                     subcollections: [{collection: 'userTransactions'}],
