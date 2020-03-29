@@ -5,6 +5,8 @@ import {Redirect} from 'react-router-dom'
 import {Link} from 'react-router-dom'
 
 class SignIn extends Component {
+    
+
     state ={
         email:'',
         password: ''
@@ -42,7 +44,11 @@ class SignIn extends Component {
                         {authError? <p>{authError}</p>:null}
                     </div>
                 </div>
+                
+                
                 <Link to="/reset" className="btn btn-primary">Reset Password</Link>
+                <Link to="/google" className="btn btn-primary">Sign In with Google</Link>
+
                 </form>
             </div>
         )

@@ -15,6 +15,7 @@ import Messages from './components/messaging/messages'
 import Transactions from "./components/transactions/Transactions";
 import CreateEditTransaction from "./components/transactions/CreateEditTransaction";
 import Visualizations from "./components/visualizations/chart"
+import Google from './components/auth/google'
 
 class App extends Component {
   render(){
@@ -37,6 +38,8 @@ class App extends Component {
        <Route path='/memos' component={Memos}/>
        <Route path='/messages' component={Messages}/>
        <Route path='/visualizations' component={Visualizations}/>
+       <Route path='/google' component={Google}/>
+
      </Switch>
     </div>
     </BrowserRouter>
