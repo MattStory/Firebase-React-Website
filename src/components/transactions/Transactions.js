@@ -147,8 +147,19 @@ class Transactions extends Component {
         return (<span>{targetFund.nickname + ' ' + targetFund.fundType}</span>)
     };
 
-    getAccountOptions = (row) => {
-        console.log(row)
+    getAccountOptions = () => {
+        let userFunds = [];
+        this.props.userFunds.forEach(userFund => {
+            let formattedFund = {};
+            let label = userFund.nickname + ' ' + userFund.fundType + ', Balance: $' + userFund.balance;
+            let value = userFund.id;
+            formattedFund['label'] = label;
+            formattedFund['value'] = value;
+
+            userFunds.push(formattedFund);
+        });
+
+        return userFunds
     }
 
     // Columns for table, moved here to access class methods
@@ -188,18 +199,7 @@ class Transactions extends Component {
         editor: {
             type: Type.SELECT,
             getOptions: (setOptions, { row, column }) => {
-                let userFunds = [];
-                this.props.userFunds.forEach(userFund => {
-                    let formattedFund = {};
-                    let label = userFund.nickname + ' ' + userFund.fundType + ', Balance: $' + userFund.balance;
-                    let value = userFund.id;
-                    formattedFund['label'] = label;
-                    formattedFund['value'] = value;
-
-                    userFunds.push(formattedFund);
-                });
-
-                return userFunds
+                return this.getAccountOptions()
             }
         },
         editorClasses: "browser-default"

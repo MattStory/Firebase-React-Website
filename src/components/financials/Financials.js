@@ -40,13 +40,11 @@ class Financials extends Component{
     }
 
     handleDel = (e) => {
-        console.log(e)
         e.preventDefault();
         this.props.delFund(this.state)
     }
 
     handleSelectChange = (e) => {
-        console.log(e.value)
         this.setState({
             fundSelected: e.value
         })
@@ -61,12 +59,8 @@ class Financials extends Component{
     render() {
         const {auth} = this.props;
         if(!auth.uid) return <Redirect to= '/signin'/>;
-        // console.log(this.props);
-        // console.log(this.state);
-        // console.log('render');
         //f(funds) return <Redirect to= '/signin'/>;
         const funds = this.props.funds;
-        console.log(funds)
 
         let fundOptions = [];
 
@@ -87,9 +81,6 @@ class Financials extends Component{
             value: v.id
         }))
 
-        console.log(userFunds)
-
-        // console.log(funds);
         return(
             <div className={"container mt-10"}>
                 <div className ="card z-depth-0">
@@ -178,7 +169,6 @@ class Financials extends Component{
 }
 
 const mapStateToProps = (state) =>{
-    //console.log(state);
     return {
         funds: state.firestore.ordered.funds,
         auth: state.firebase.auth
