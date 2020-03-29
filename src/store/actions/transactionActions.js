@@ -4,23 +4,29 @@ export const createTransaction = (transaction, history) => {
         const userId = getState().firebase.auth.uid;
         const profile = getState().firebase.profile;
         //check if user's collection has been created
-        let docRef = firestore.collection("transactions").doc(userId);
+        let transactionDocRef = firestore.collection("transactions").doc(userId);
 
         let dateParts = transaction.transactionDate.split("-"); // yyyy-mm-dd
         transaction['transactionDate'] = dateParts[1] + '/' + dateParts[2] + '/' + dateParts[0];
 
-        docRef.get().then(function (doc) {
+        // create record in userTransactions
+        transactionDocRef.get().then(function (doc) {
             if (!doc.exists) {
-                docRef.set({
+                transactionDocRef.set({
                     owner: profile.firstName + ' ' + profile.lastName
                 })
             }
 
-            docRef = docRef.collection('userTransactions');
+            transactionDocRef = transactionDocRef.collection('userTransactions');
 
-            docRef.add({
-                ...transaction,
-                createdAt: new Date()
+            transactionDocRef.add({
+                amount: transaction.amount,
+                merchant: transaction.merchant,
+                transactionCategory: transaction.transactionCategory,
+                transactionDate: transaction.transactionDate,
+                financialAcct: transaction.financialAcct,
+                createdAt: new Date(),
+                editedAt: new Date()
             }).then(() => {
                 dispatch({type: 'CREATE_FUND', transaction});
                 //alert("Transaction Created");
@@ -34,6 +40,16 @@ export const createTransaction = (transaction, history) => {
             console.log("Error getting document:", error);
         });
 
+
+        // update financial account balance
+
+        let fundDocRef = firestore.collection("funds").doc(transaction.financialAcct);
+
+        fundDocRef.update({
+            balance: transaction.acctBalance - transaction.amount
+        }).catch(function (error) {
+            console.log("Error updating document:", error);
+        });
 
     }
 };
@@ -52,6 +68,7 @@ export const updateTransaction = (transactionToUpdate) => {
         let transactionUpdate = {};
 
         transactionUpdate[transactionToUpdate.dataField] = transactionToUpdate.newValue;
+        transactionUpdate['editedAt'] = new Date();
 
         docRef.update(transactionUpdate)
             .catch(function (error) {
@@ -72,6 +89,80 @@ export const deleteTransactions = (transactions) => {
 
         transactions.forEach(transaction => {
             docRef.doc(transaction)
+                .delete()
+                .catch(function (error) {
+                    console.log("Error getting document:", error);
+                })
+        })
+    }
+};
+
+export const newCustomCategory = (category) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
+        const firestore = getFirestore();
+        const userId = getState().firebase.auth.uid;
+        const profile = getState().firebase.profile;
+
+        //check if user's collection has been created
+        let docRef = firestore.collection("transactions").doc(userId);
+
+        docRef.get().then(function (doc) {
+            if (!doc.exists) {
+                docRef.set({
+                    owner: profile.firstName + ' ' + profile.lastName // initialize transaction document
+                })
+            }
+
+            docRef = docRef.collection('customCategories');
+
+            docRef.add({
+                category: category,
+                createdAt: new Date(),
+                editedAt: new Date()
+            })
+
+
+        }).catch(function (error) {
+            console.log("Error getting document:", error);
+        });
+    }
+}
+
+export const updateCustomCategory = (categoryToUpdate) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
+        const firestore = getFirestore();
+        const userId = getState().firebase.auth.uid;
+
+        let docRef = firestore
+            .collection("transactions")
+            .doc(userId)
+            .collection('customCategories')
+            .doc(categoryToUpdate.id);
+
+        let categoryUpdate = {};
+
+        categoryUpdate['category'] = categoryUpdate.value;
+        categoryUpdate['editedAt'] = new Date();
+
+        docRef.update(categoryUpdate)
+            .catch(function (error) {
+                console.log("Error getting document:", error);
+            });
+    }
+};
+
+export const deleteCustomCategories = (categories) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
+        const firestore = getFirestore();
+        const userId = getState().firebase.auth.uid;
+
+        let docRef = firestore
+            .collection("transactions")
+            .doc(userId)
+            .collection('customCategories');
+
+        categories.forEach(category => {
+            docRef.doc(category)
                 .delete()
                 .catch(function (error) {
                     console.log("Error getting document:", error);

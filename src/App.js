@@ -13,7 +13,7 @@ import reset from './components/auth/reset'
 import Memos from './components/Memos/memos'
 import Messages from './components/messaging/messages'
 import Transactions from "./components/transactions/Transactions";
-import CreateEditTransaction from "./components/transactions/CreateEditTransaction";
+import CreateTransaction from "./components/transactions/CreateTransaction";
 import Visualizations from "./components/visualizations/chart"
 
 class App extends Component {
@@ -30,7 +30,7 @@ class App extends Component {
        <Route path ='/create' component ={CreateProject}/>
        <Route path ='/financials' component ={Financials}/>
        <Route path ='/transactions' component={Transactions}/>
-       <Route path ='/create_edit_transaction' component={CreateEditTransaction}/>
+       <Route path ='/create_transaction' component={CreateTransaction}/>
        <Route path ='/profile' component ={Profile}/>
        <Route path ='/createFund' component ={createFund}/>
        <Route path ='/reset' component ={reset}/>

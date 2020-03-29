@@ -213,7 +213,7 @@ class Transactions extends Component {
                         null
                     }
                 </div>
-                <Link to={"/create_edit_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
+                <Link to={"/create_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
                 <button data-target={"exportModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...
                 </button>
                 <button data-target={"deleteModal"} className={"btn modal-trigger green lighten-1"}>Delete...</button>
