@@ -13,8 +13,9 @@ import reset from './components/auth/reset'
 import Memos from './components/Memos/memos'
 import Messages from './components/messaging/messages'
 import Transactions from "./components/transactions/Transactions";
-import CreateTransaction from "./components/transactions/CreateTransaction";
+import CreateEditTransaction from "./components/transactions/CreateEditTransaction";
 import Visualizations from "./components/visualizations/chart"
+import Google from './components/auth/google'
 
 class App extends Component {
   render(){
@@ -30,13 +31,14 @@ class App extends Component {
        <Route path ='/create' component ={CreateProject}/>
        <Route path ='/financials' component ={Financials}/>
        <Route path ='/transactions' component={Transactions}/>
-       <Route path ='/create_transaction' component={CreateTransaction}/>
+       <Route path ='/create_edit_transaction' component={CreateEditTransaction}/>
        <Route path ='/profile' component ={Profile}/>
        <Route path ='/createFund' component ={createFund}/>
        <Route path ='/reset' component ={reset}/>
        <Route path='/memos' component={Memos}/>
        <Route path='/messages' component={Messages}/>
        <Route path='/visualizations' component={Visualizations}/>
+	   <Route path='/google' component={Google}/>
      </Switch>
     </div>
     </BrowserRouter>

@@ -2,41 +2,42 @@ export const createMessage =(newMsg)=>{
     return(dispatch, getState, {getFirebase, getFirestore})=>{
         const firestore = getFirestore();
         const uid = getState().firebase.auth.uid.toString();
-        const email = getState().firebase.auth.email.toString();
         const profile = getState().firebase.profile;
-        const content = newMsg.content;
         var docRef;
-        
-        var key = uid;
     
-        docRef = firestore.collection('messages').doc('supportMsgs').collection('msgThreads').doc(key);
+        docRef = firestore.collection('supportTickets').doc(uid);
 
         docRef.get().then((docSnapshot) => {
             if (!docSnapshot.exists) {
                 docRef.set({
-                    threadStatus: "active",
-                    threadID: key
-                }).then(() => {
-                    dispatch({ type: 'CREATE_THREAD' });
-                }).catch((err) => {
-                    dispatch({ type: 'CREATE_THREAD_ERR'}, err);
+                    user: profile.firstName,
+                    userID: uid
                 })
             } 
         })
 
-        docRef.collection("userSupportMsgs").add({
+        docRef.collection("userTickets").add({
             ...newMsg,
-            //msgCont: newMsg.content,
             msgTime: new Date(),
-            name: profile.firstName,
-            id: uid
+            uid: uid,
+            email: profile.email
         }).then(() => {
-            dispatch({ type: 'CREATE_MSG', newMsg });
+            dispatch({ type: 'CREATE_TICKET', newMsg });
         }).catch((err) => {
-            dispatch({ type: 'CREATE_MSG_ERR'}, err);
+            dispatch({ type: 'CREATE_TICKET_ERR'}, err);
         })
+    }
+}
 
-        //sendEmail(email, content);
+export const closeTicket = (docID) => {
+    return(dispatch, getState, {getFirebase, getFirestore})=>{
+        const firestore = getFirestore();
+        const uid = getState().firebase.auth.uid.toString();
+        firestore.collection('supportTickets').doc(uid).collection("userTickets").doc(docID).delete().then(() => {
+            dispatch({ type: 'CLOSE_TICKET', docID });
+        }).catch((err) => {
+            dispatch({ type: 'CLOSE_TICKET_ERR'}, err);
+        })
     }
 }
 

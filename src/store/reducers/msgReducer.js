@@ -1,21 +1,27 @@
 const InitState = {
-    messages:[
-        {name: 'Seth Rogen', content: 'I love pineapples expressly', timestamp: '42:04:20'},
-        {name: 'Jonah Hill', content: 'There is pizza on my pants', timestamp: '24:40:02'}
+    supportTickets:[
+        {content: 'I love pineapples expressly', email: 'sethrogen@collegecap.org'},
+        {content: 'There is pizza on my pants', email: 'jonahhill@collegecap.org'}
     ]
 }
 
 const msgReducer = (state = InitState, action) => {
-    if (action.type === "CREATE_MSG") {
-        console.log("message created")
-    } else if (action.type === "CREATE_MSG_ERR") {
-        console.log("error creating message");
-    } else if (action.type === 'CLOSE_THREAD') {
-        console.log("successfully closed message thread");
-    } else if (action.type === 'FETCH_MSGS_ERR') {
-        console.log("error closing message thread");
+    switch(action.type){
+        case 'CREATE_TICKET':
+            console.log('created ticket', action.newMsg)
+            return state;
+        case 'CREATE_TICKET_ERR':
+            console.log('create transaction err', action.err)
+            return state;
+        case 'CLOSE_TICKET':
+            console.log('close ticket', action.docID)
+            return state;
+        case 'CLOSE_TICKET_ERR':
+            console.log('close ticket err', action.err)
+            return state;
+        default:
+            return state;
     }
-    return state;
 }
 
 export default msgReducer;

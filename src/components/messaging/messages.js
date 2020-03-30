@@ -3,8 +3,9 @@ import {connect} from 'react-redux';
 import {compose} from 'redux'
 import {firestoreConnect} from 'react-redux-firebase'
 import {Redirect} from 'react-router-dom'
-import { createMessage, getThreadKey, closeThread } from '../../store/actions/msgActions'
-import messageList from './messageList'
+import { createMessage } from '../../store/actions/msgActions'
+import Axios from 'axios'
+import MessageList from './messageList'
 import './messages.css'
 
 class Messages extends Component {
@@ -28,8 +29,12 @@ class Messages extends Component {
     handelSubmit = (event) => {
         event.preventDefault();
         this.props.createMessage(this.state);
+        Axios.post('https://us-central1-college-capital-ed06f.cloudfunctions.net/submit', this.state).catch(error => {
+            console.log(error);
+        })
         this.setState ({
-            content: ""
+            content: '',
+            email: ''
         })
     }
 
@@ -38,27 +43,31 @@ class Messages extends Component {
         if(!auth.uid) return <Redirect to= '/signin'/>
         this.state.email = auth.email;
 
+        console.log(this.props);
+       console.log(this.props.supportTickets);
+       var supportTickets;
+       if (this.props.supportTickets != undefined) {
+        supportTickets = this.props.supportTickets;
+       }
+       console.log(supportTickets);
         return (
             <div className ="container">
                 <form onSubmit={this.handelSubmit} className ="white">
                     <h5 className ="grey-text text-darken-3">Message Support</h5>
-                    {/*
-                    <div className = "msgsContainer">
-                        { this.props.messages && this.props.messages.map(message => {
-                            return (
-                                <messageList message={message} uid={message.id} />
-                            )
-                        })}
-                    </div>  
-                    */}
                     <div className = "input-field">
                         <label htmlFor="content">Enter Message Here</label>
-                        <input  type ="text" id="content"onChange ={this.handleChange}/>
+                        <input type ="text" value={this.state.content} id="content" onChange={this.handleChange}/>
                     </div>
                     <div className ="input-field">
                         <button className = "btn green lighten-1 z-depth-0">Send New Ticket</button>
                     </div>
-                </form>
+                </form> 
+                {this.props.supportTickets != null
+                        ?
+                        <MessageList tickets = {supportTickets} />
+                        :
+                        console.log("not rendering" )
+                }
             </div>
         )
     }
@@ -66,9 +75,8 @@ class Messages extends Component {
 
 const mapStateToProps = (state) => {
     return {
-        messages : state.firestore.ordered.messages,
-        auth: state.firebase.auth,
-        userProfile: state.firebase.userProfile
+        supportTickets: state.firestore.ordered.supportTickets,
+        auth: state.firebase.auth
     }
 }
 
@@ -81,15 +89,14 @@ const mapDispatchToProps = (dispatch) => {
 export default compose(
     connect(mapStateToProps, mapDispatchToProps),
     firestoreConnect(props => {
+        //console.log(props.auth.uid + "3");
         if (typeof props.auth.uid != "undefined"){
             return [
                 {
-                    collection: 'messages',
-                    doc: 'supportMsgs',
-                    subcollections: [{ collection: 'msgThreads' }],
+                    collection: 'supportTickets',
                     doc: props.auth.uid,
-                    subcollections: [{ collection: 'userSupportMsgs' }],
-                    storeAs: 'messages'
+                    subcollections: [{ collection: 'userTickets' }],
+                    storeAs: "supportTickets"
                 }
             ]
         } else {

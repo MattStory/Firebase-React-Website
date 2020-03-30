@@ -43,6 +43,7 @@ class SignIn extends Component {
                     </div>
                 </div>
                 <Link to="/reset" className="btn btn-primary">Reset Password</Link>
+				<Link to="/google" className="btn btn-primary">Sign In with Google</Link>
                 </form>
             </div>
         )

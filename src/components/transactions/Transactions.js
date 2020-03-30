@@ -18,6 +18,8 @@ import cellEditFactory, {Type} from 'react-bootstrap-table2-editor';
 // Pagination Module
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
+import {createTransaction} from "../../store/actions/transactionActions";
+import Popup from "reactjs-popup";
 
 const transactionCategory = [
     {value: "Dining", label: "Dining"},
@@ -26,6 +28,43 @@ const transactionCategory = [
     {value: "Grocery", label: "Grocery"},
     {value: "Bar & Coffee Shop", label: "Bar & Coffee Shop"},
     {value: "Fee", label: "Fee"}];
+
+// Columns for table
+const columns = [{
+    dataField: 'id',
+    hidden: true
+}, {
+    dataField: 'merchant',
+    text: 'Merchant',
+    sort: true
+}, {
+    dataField: 'amount',
+    text: 'Amount',
+    sort: true,
+    sortFunc: (a, b, order) => {
+        if (order === 'desc') {
+            return a - b;
+        } else {
+            return b - a;
+        }
+    },
+    type: 'number'
+}, {
+    dataField: 'transactionCategory',
+    text: 'Category',
+    sort: true,
+    editor: {
+        type: Type.SELECT,
+        options: transactionCategory
+    },
+    editorClasses: "browser-default"
+}, {
+    dataField: 'transactionDate',
+    text: 'Transaction Date',
+    sort: true,
+    type: 'string',
+    editor: {type: Type.DATE}
+}];
 
 // Page pagination options
 const paginationOption = {
@@ -59,50 +98,52 @@ class Transactions extends Component {
         };
         materialize.Modal.init(this.deleteModal, options);
         materialize.Modal.init(this.exportModal, options);
-
-        this.exportForm = React.createRef()
     }
 
     handleExport = (e) => {
-        // performs form validation
-        if (!this.exportForm.current.reportValidity())
-            return;
-
         e.preventDefault();
-
-        let transactionsToExport = [];
-
-        if (e.target.id === 'export-all')
-            transactionsToExport = this.props.transactions;
-        else if (e.target.id === 'export-selected') {
-            if (this.state.rowsSelected === undefined){
-                alert("Oops! No row selected to export!");
-                return;
-            }
-
-            this.state.rowsSelected.forEach(row => {
-                let transaction = this.props.transactions.find(t => t.id === row);
-
-                transactionsToExport.push(transaction)
-            })
-        }
-
         switch (this.state.exportOption) {
             case 'json':
-                exportJSON(transactionsToExport);
+                this.handleExportJSON();
                 break;
             case 'csv':
-                exportCSV(transactionsToExport);
+                this.handleExportCSV();
                 break;
             default:
                 break;
         }
+        alert("Transactions exported.")
     };
+
+    handleExportJSON() {
+        exportJSON(this.props.transactions)
+    }
+
+    handleExportCSV() {
+        exportCSV(this.props.transactions)
+    }
 
     handleExportOptionChange = (e) => {
         this.setState({
             exportOption: e.target.value
         });
+    };
+
+    onTableChange = (type, newState) => {
+        if (type === "cellEdit") {
+            let transactionToUpdate = {
+                "id": newState.cellEdit.rowId,
+                "dataField": newState.cellEdit.dataField,
+                "newValue": newState.cellEdit.newValue
+            };
+
+            if (transactionToUpdate['dataField'] === 'transactionDate') { // format date before entering database
+                let dateParts = transactionToUpdate['newValue'].split("-"); // yyyy-mm-dd
+                transactionToUpdate['newValue'] = dateParts[1] + '/' + dateParts[2] + '/' + dateParts[0];
+            }
+
+            this.props.updateTransaction(transactionToUpdate);
+        }
     };
 
     handleSelectRow(transactionID, isSelect) {
@@ -140,94 +181,8 @@ class Transactions extends Component {
             this.props.deleteTransactions(this.state.rowsSelected);
     };
 
-    onTableChange = (type, newState) => {
-        if (type === "cellEdit") {
-            let transactionToUpdate = {
-                "id": newState.cellEdit.rowId,
-                "dataField": newState.cellEdit.dataField,
-                "newValue": newState.cellEdit.newValue
-            };
-
-            if (transactionToUpdate['dataField'] === 'transactionDate') { // format date before entering database
-                let dateParts = transactionToUpdate['newValue'].split("-"); // yyyy-mm-dd
-                transactionToUpdate['newValue'] = dateParts[1] + '/' + dateParts[2] + '/' + dateParts[0];
-            }
-
-            this.props.updateTransaction(transactionToUpdate);
-        }
-    };
-
-    accountFormatter = (id) => {
-        let targetFund = this.props.userFunds.find(fund => fund.id === id);
-        return (<span>{targetFund.nickname + ' ' + targetFund.fundType}</span>)
-    };
-
-    getAccountOptions = () => {
-        let userFunds = [];
-        this.props.userFunds.forEach(userFund => {
-            let formattedFund = {};
-            let label = userFund.nickname + ' ' + userFund.fundType + ', Balance: $' + userFund.balance;
-            let value = userFund.id;
-            formattedFund['label'] = label;
-            formattedFund['value'] = value;
-
-            userFunds.push(formattedFund);
-        });
-
-        return userFunds
-    }
-
-    // Columns for table, moved here to access class methods
-    columns = [{
-        dataField: 'id',
-        hidden: true
-    }, {
-        dataField: 'merchant',
-        text: 'Merchant',
-        sort: true
-    }, {
-        dataField: 'amount',
-        text: 'Amount',
-        sort: true,
-        sortFunc: (a, b, order) => {
-            if (order === 'desc') {
-                return a - b;
-            } else {
-                return b - a;
-            }
-        },
-        type: 'number'
-    }, {
-        dataField: 'transactionCategory',
-        text: 'Category',
-        sort: true,
-        editor: {
-            type: Type.SELECT,
-            options: transactionCategory
-        },
-        editorClasses: "browser-default"
-    }, {
-        dataField: 'financialAcct',
-        text: 'Account',
-        sort: true,
-        formatter: this.accountFormatter,
-        editor: {
-            type: Type.SELECT,
-            getOptions: (setOptions, { row, column }) => {
-                return this.getAccountOptions()
-            }
-        },
-        editorClasses: "browser-default"
-    }, {
-        dataField: 'transactionDate',
-        text: 'Transaction Date',
-        sort: true,
-        type: 'string',
-        editor: {type: Type.DATE}
-    }
-    ];
-
     render() {
+        //console.log(this.props.transactions);
         return (
             <div className={"container mt"}>
                 <div className="card z-depth-3">
@@ -236,7 +191,7 @@ class Transactions extends Component {
                         <BootstrapTable
                             keyField="id"
                             data={this.props.transactions}
-                            columns={this.columns}
+                            columns={columns}
                             pagination={paginationFactory(paginationOption)}
                             selectRow={{
                                 mode: 'checkbox',
@@ -260,7 +215,7 @@ class Transactions extends Component {
                         null
                     }
                 </div>
-                <Link to={"/create_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
+                <Link to={"/create_edit_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
                 <button data-target={"exportModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...
                 </button>
                 <button data-target={"deleteModal"} className={"btn modal-trigger green lighten-1"}>Delete...</button>
@@ -294,12 +249,12 @@ class Transactions extends Component {
                          id={"exportModal"}
                          className={"modal"}>
                         <div className={"modal-content"}>
-                            <form ref={this.exportForm}>
+                            <form>
                                 <h4 className={"grey-text text-darken-3"}>Export Options</h4>
                                 <div>
                                     <label>
                                         <input className={"with-gap"} name={"optionGroup"} id="json" value="json"
-                                               type="radio" onChange={this.handleExportOptionChange} required={true}/>
+                                               type="radio" onChange={this.handleExportOptionChange}/>
                                         <span>JSON</span>
                                     </label>
                                 </div>
@@ -310,18 +265,14 @@ class Transactions extends Component {
                                         <span>CSV</span>
                                     </label>
                                 </div>
-                                <button id={"export-all"} type={"submit"} className={"btn green lighten-1"}
-                                        onClick={this.handleExport}>Export All
-                                </button>
-                                <button id={"export-selected"} className={"btn green lighten-1 ms-5"}
-                                        onClick={this.handleExport}>Export Selected
-                                </button>
-                                <a className="modal-close btn grey darken-3 white-text"
-                                   style={{"marginLeft": "2%"}}>
-                                    Close
-                                </a>
                                 <div className={"form-group"}>
-
+                                    <button className={"modal-close btn green lighten-1"}
+                                            onClick={this.handleExport}>Export
+                                    </button>
+                                    <a className="modal-close btn grey darken-3 white-text"
+                                       style={{"marginLeft": "2%"}}>
+                                        Close
+                                    </a>
                                 </div>
                             </form>
                         </div>
@@ -342,8 +293,7 @@ const mapDispatchToProps = (dispatch) => {
 const mapStateToProps = (state) => {
     return {
         transactions: state.firestore.ordered.transactions,
-        auth: state.firebase.auth,
-        userFunds: state.firestore.ordered.userFunds
+        auth: state.firebase.auth
     };
 };
 
@@ -353,12 +303,6 @@ export default compose(
         if (typeof props.auth.uid != "undefined") {
             return [
                 {
-                    collection: 'funds',
-                    where: [
-                        ['uid', '==', props.auth.uid]
-                    ],
-                    storeAs: 'userFunds'
-                }, {
                     collection: 'transactions',
                     doc: props.auth.uid,
                     subcollections: [{collection: 'userTransactions'}],
