@@ -79,7 +79,6 @@ export const updateTransaction = (transactionToUpdate) => {
                 transactionAmount = parseFloat(doc.data().amount);
             }).then(() => {
                 // update original account
-                console.log(originalAcct)
                 let originalAcctDocRef = firestore
                     .collection('funds')
                     .doc(originalAcct);

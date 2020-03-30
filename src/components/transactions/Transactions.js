@@ -59,30 +59,45 @@ class Transactions extends Component {
         };
         materialize.Modal.init(this.deleteModal, options);
         materialize.Modal.init(this.exportModal, options);
+
+        this.exportForm = React.createRef()
     }
 
     handleExport = (e) => {
+        // performs form validation
+        if (!this.exportForm.current.reportValidity())
+            return;
+
         e.preventDefault();
+
+        let transactionsToExport = [];
+
+        if (e.target.id === 'export-all')
+            transactionsToExport = this.props.transactions;
+        else if (e.target.id === 'export-selected') {
+            if (this.state.rowsSelected === undefined){
+                alert("Oops! No row selected to export!");
+                return;
+            }
+
+            this.state.rowsSelected.forEach(row => {
+                let transaction = this.props.transactions.find(t => t.id === row);
+
+                transactionsToExport.push(transaction)
+            })
+        }
+
         switch (this.state.exportOption) {
             case 'json':
-                this.handleExportJSON();
+                exportJSON(transactionsToExport);
                 break;
             case 'csv':
-                this.handleExportCSV();
+                exportCSV(transactionsToExport);
                 break;
             default:
                 break;
         }
-        alert("Transactions exported.")
     };
-
-    handleExportJSON() {
-        exportJSON(this.props.transactions)
-    }
-
-    handleExportCSV() {
-        exportCSV(this.props.transactions)
-    }
 
     handleExportOptionChange = (e) => {
         this.setState({
@@ -279,12 +294,12 @@ class Transactions extends Component {
                          id={"exportModal"}
                          className={"modal"}>
                         <div className={"modal-content"}>
-                            <form>
+                            <form ref={this.exportForm}>
                                 <h4 className={"grey-text text-darken-3"}>Export Options</h4>
                                 <div>
                                     <label>
                                         <input className={"with-gap"} name={"optionGroup"} id="json" value="json"
-                                               type="radio" onChange={this.handleExportOptionChange}/>
+                                               type="radio" onChange={this.handleExportOptionChange} required={true}/>
                                         <span>JSON</span>
                                     </label>
                                 </div>
@@ -295,14 +310,18 @@ class Transactions extends Component {
                                         <span>CSV</span>
                                     </label>
                                 </div>
+                                <button id={"export-all"} type={"submit"} className={"btn green lighten-1"}
+                                        onClick={this.handleExport}>Export All
+                                </button>
+                                <button id={"export-selected"} className={"btn green lighten-1 ms-5"}
+                                        onClick={this.handleExport}>Export Selected
+                                </button>
+                                <a className="modal-close btn grey darken-3 white-text"
+                                   style={{"marginLeft": "2%"}}>
+                                    Close
+                                </a>
                                 <div className={"form-group"}>
-                                    <button className={"modal-close btn green lighten-1"}
-                                            onClick={this.handleExport}>Export
-                                    </button>
-                                    <a className="modal-close btn grey darken-3 white-text"
-                                       style={{"marginLeft": "2%"}}>
-                                        Close
-                                    </a>
+
                                 </div>
                             </form>
                         </div>
