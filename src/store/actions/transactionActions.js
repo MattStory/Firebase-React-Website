@@ -116,7 +116,7 @@ export const updateTransaction = (transactionToUpdate) => {
                         console.log("Error getting document:", error);
                     });
             });
-        }else if (transactionToUpdate.dataField === 'amount'){
+        } else if (transactionToUpdate.dataField === 'amount') {
             let originalAmount = 0;
             let financialAcct = '';
 
@@ -148,8 +148,7 @@ export const updateTransaction = (transactionToUpdate) => {
             });
 
 
-
-        }else {
+        } else {
             transactionDocRef.update(transactionUpdate)
                 .catch(function (error) {
                     console.log("Error getting document:", error);
@@ -168,12 +167,33 @@ export const deleteTransactions = (transactions) => {
             .doc(userId)
             .collection('userTransactions');
 
+        let amount, financialAcct;
+
         transactions.forEach(transaction => {
-            docRef.doc(transaction)
-                .delete()
-                .catch(function (error) {
-                    console.log("Error getting document:", error);
-                })
+            docRef.doc(transaction).get().then(function (doc) {
+                amount = parseFloat(doc.data().amount);
+                financialAcct = doc.data().financialAcct;
+            }).then(() => {
+                docRef.doc(transaction).delete()
+                    .then(() => {
+                        // proceed to update fund
+                        let fundDocRef = firestore
+                            .collection('funds')
+                            .doc(financialAcct);
+
+                        let fundBalance;
+
+                        fundDocRef.get().then(function (doc) {
+                            fundBalance = parseFloat(doc.data().balance)
+                        }).then(() => {
+                            fundDocRef.update({
+                                balance: fundBalance + amount
+                            })
+                        })
+                    })
+            })
+
+
         })
     }
 };
