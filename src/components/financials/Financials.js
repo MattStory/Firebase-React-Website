@@ -3,12 +3,12 @@ import {connect} from 'react-redux'
 import {firestoreConnect} from 'react-redux-firebase'
 import {compose} from 'redux'
 import {Redirect} from "react-router-dom";
-import {signUp} from "../../store/actions/authActions";
 import './Financials.css'
 import FundList from './FundList'
 import CreateFund from "./CreateFund";
 import {editFund} from "../../store/actions/fundActions";
 import Select from "react-select";
+import {getStock} from "../../store/actions/stockActions";
 
 class Financials extends Component{
     constructor(props) {
@@ -40,13 +40,11 @@ class Financials extends Component{
     }
 
     handleDel = (e) => {
-        console.log(e)
         e.preventDefault();
         this.props.delFund(this.state)
     }
 
     handleSelectChange = (e) => {
-        console.log(e.value)
         this.setState({
             fundSelected: e.value
         })
@@ -58,23 +56,22 @@ class Financials extends Component{
         })
     }
 
+    handleGetStock = (e) => {
+        e.preventDefault();
+        this.props.getStock(this.state.symbol)
+    };
+
     render() {
         const {auth} = this.props;
-        if(!auth.uid) return <Redirect to= '/signin'/>;
-        // console.log(this.props);
-        // console.log(this.state);
-        // console.log('render');
-        //f(funds) return <Redirect to= '/signin'/>;
+        if(auth.isLoaded && auth.isEmpty) return <Redirect to= '/signin'/>;
+
         const funds = this.props.funds;
-        console.log(funds)
 
         let fundOptions = [];
 
         let userFunds = []
 
         if (this.props.funds != null){
-            
-
             funds.forEach(f => {
                 if (f.uid === auth.uid){
                     userFunds.push(f);
@@ -87,11 +84,29 @@ class Financials extends Component{
             value: v.id
         }))
 
-        console.log(userFunds)
+        let queriedStock;
 
-        // console.log(funds);
+        if (this.props.stock && this.props.stock.priceDiff >= 0){
+            queriedStock = <label className={"green-text"}>{this.props.stock.symbol}: ${this.props.stock.currentPrice}, Since Open: {this.props.stock.priceDiff.toPrecision(2)}</label>
+        }else if (this.props.stock && this.props.stock.priceDiff < 0){
+            queriedStock = <label className={"red-text"}>{this.props.stock.symbol}: ${this.props.stock.currentPrice}, Since Open: {this.props.stock.priceDiff.toPrecision(2)}</label>
+        }
+
+
+
         return(
             <div className={"container mt-10"}>
+                <div className ="card z-depth-0">
+                    <div className={"container center"}>
+                        <div className={"input-field"}>
+                            <input type={"text"} id={'symbol'} className={"center"} onChange={this.handleChange}/>
+                        </div>
+                        <button className={"btn green lighten-1 center"} onClick={this.handleGetStock}>Get Stock Symbol</button>
+                        <div>
+                            {queriedStock}
+                        </div>
+                    </div>
+                </div>
                 <div className ="card z-depth-0">
                     {this.state.showCreateFund
                         ?
@@ -178,16 +193,18 @@ class Financials extends Component{
 }
 
 const mapStateToProps = (state) =>{
-    //console.log(state);
+    console.log(state)
     return {
         funds: state.firestore.ordered.funds,
-        auth: state.firebase.auth
+        auth: state.firebase.auth,
+        stock: state.stocks
     };
 };
 
 const mapDispatchToProps=(dispatch)=>{
     return{
-        editFund: (fund)=> dispatch(editFund(fund))
+        editFund: (fund)=> dispatch(editFund(fund)),
+        getStock: (symbols) => dispatch(getStock(symbols))
     }
 }
 
