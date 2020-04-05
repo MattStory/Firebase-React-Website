@@ -19,12 +19,6 @@ import cellEditFactory, {Type} from 'react-bootstrap-table2-editor';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 
-// Table Sarch Module
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit'
-import bootstrapTable from 'react-bootstrap-table-next/lib/src/bootstrap-table';
-import propsResolver from 'react-bootstrap-table-next/lib/src/props-resolver';
-const { SearchBar, ClearSearchButton } = Search;
-
 const transactionCategory = [
     {value: "Dining", label: "Dining"},
     {value: "Travel", label: "Travel"},
@@ -239,42 +233,29 @@ class Transactions extends Component {
                 <div className="card z-depth-3">
                     {this.props.transactions != null
                         ?
-                        <ToolkitProvider
+                        <BootstrapTable
                             keyField="id"
                             data={this.props.transactions}
                             columns={this.columns}
-                            search
-                        >
-                            {
-                                props => (
-                                    <div>
-                                        <SearchBar { ...props.searchProps } />
-                                        <ClearSearchButton { ...props.searchProps } />
-                                        <BootstrapTable
-                                            pagination={paginationFactory(paginationOption)}
-                                            selectRow={{
-                                                mode: 'checkbox',
-                                                //clickToSelect: true,
-                                                bgColor: '#68DE11',
-                                                selectColumnStyle: {
-                                                    backgroundColor: '#68DE11'
-                                                },
-                                                onSelect: (row, isSelect, rowIndex, e) => {
-                                                    this.handleSelectRow(row.id, isSelect)
-                                                }
-                                                //clickToEdit: true
-                                            }}
-                                            defaultSorted={defaultSorted}
-                                            cellEdit={cellEditFactory(cellEdit)}
-                                            noDataIndication="No Transactions"
-                                            remote={{cellEdit: true}}
-                                            onTableChange={this.onTableChange}
-                                            { ...props.baseProps}
-                                        />
-                                    </div>
-                                )
-                            }
-                        </ToolkitProvider>
+                            pagination={paginationFactory(paginationOption)}
+                            selectRow={{
+                                mode: 'checkbox',
+                                //clickToSelect: true,
+                                bgColor: '#68DE11',
+                                selectColumnStyle: {
+                                    backgroundColor: '#68DE11'
+                                },
+                                onSelect: (row, isSelect, rowIndex, e) => {
+                                    this.handleSelectRow(row.id, isSelect)
+                                }
+                                //clickToEdit: true
+                            }}
+                            defaultSorted={defaultSorted}
+                            cellEdit={cellEditFactory(cellEdit)}
+                            noDataIndication="No Transactions"
+                            remote={{cellEdit: true}}
+                            onTableChange={this.onTableChange}
+                        />
                         :
                         null
                     }
