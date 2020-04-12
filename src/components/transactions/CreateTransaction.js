@@ -1,6 +1,6 @@
 import React, {Component, withRouter} from "react";
 import {connect} from "react-redux";
-import {createTransaction, newCustomCategory} from "../../store/actions/transactionActions"
+import {createTransaction, newCustomCategory, largeTransactionAlert, lowBalanceAlert} from "../../store/actions/transactionActions"
 import Select from 'react-select';
 import {Link} from "react-router-dom";
 import materialize from "materialize-css";
@@ -49,6 +49,8 @@ class CreateTransaction extends Component {
             alert("Please select a financial account! If no account is available, please add one in Financials page");
         else
             this.props.createTransaction(this.state, this.props.history);
+            this.props.largeTransactionAlert(this.state);
+            this.props.lowBalanceAlert(this.state);
     };
 
     handleCategoryChange = (e) => {
@@ -174,7 +176,9 @@ class CreateTransaction extends Component {
 const mapDispatchToProps = (dispatch) => {
     return{
         createTransaction: (transaction, history) => dispatch(createTransaction(transaction, history)),
-        newCustomCategory: (category) => dispatch(newCustomCategory(category))
+        newCustomCategory: (category) => dispatch(newCustomCategory(category)),
+        largeTransactionAlert: (transaction) => dispatch(largeTransactionAlert(transaction)),
+        lowBalanceAlert: (transaction) => dispatch(lowBalanceAlert(transaction))
     }
 };
 
