@@ -60,16 +60,35 @@ export const resetPassword =(email)=>{
 }
 
 export const googleLogin =(email)=>{
-    return (dispatch, getState, {getFirebase})=>{
+    return (dispatch, getState, {getFirebase, getFirestore})=>{
         const firebase = getFirebase();
+        const firestore = getFirestore();
         var provider = new firebase.auth.GoogleAuthProvider();
 
         firebase.auth().signInWithPopup(provider).then(function(result) {
             // This gives you a Google Access Token. You can use it to access the Google API.
+           
             var token = result.credential.accessToken;
             // The signed-in user info.
             var user = result.user;
             // ...
+            firebase.auth().createUserWithEmailAndPassword(
+                result.email,
+                result.password
+            ).then((resp)=>{
+                return firestore.collection('users').doc(resp.user.uid).set({
+                firstName: result.firstName,
+                lastName: result.lastName,
+                email: result.email,
+                address: result.address,
+                phone: result.phone,
+                studentId: result.studentId
+                })
+            }).then(()=>{
+                dispatch({type: 'SIGNUP_SUCCESS'})
+            }).catch(err=>{
+                dispatch({type: 'SIGNUP_ERROR',err})
+            })
           }).catch(function(error) {
             // Handle Errors here.
             var errorCode = error.code;
