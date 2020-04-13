@@ -6,15 +6,15 @@ const InitState = {
 
 }
 
-const memReducer = (state = InitState, action) => {
+const paymentReducer = (state = InitState, action) => {
     if (action.type === "CREATE_MEM") {
         console.log("Memo Created");
         return state;
     } else if (action.type === "DELTE_MEM_DOC") {
-        console.log("Memo Deleted");
+        console.log("PAYMENT Deleted");
         return state;
     }
     return state;
 }
 
-export default memReducer;
+export default paymentReducer ;

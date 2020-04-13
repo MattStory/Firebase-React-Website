@@ -13,6 +13,7 @@ import reset from './components/auth/reset'
 import Memos from './components/Memos/memos'
 import Messages from './components/messaging/messages'
 import Transactions from "./components/transactions/Transactions";
+import Payments from "./components/Recurpayments/Payments"
 import CreateEditTransaction from "./components/transactions/CreateEditTransaction";
 
 class App extends Component {
@@ -34,6 +35,7 @@ class App extends Component {
        <Route path ='/createFund' component ={createFund}/>
        <Route path ='/reset' component ={reset}/>
        <Route path='/memos' component={Memos}/>
+       <Route path='/recur' component={Payments}/>
        <Route path='/messages' component={Messages}/>
      </Switch>
     </div>
