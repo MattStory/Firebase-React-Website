@@ -46,7 +46,7 @@ const cellEdit = {
     blurToSave: true
 };
 
-class Transactions extends Component {
+class Transactions extends Component { 
     // For Modal
     componentDidMount() {
         const options = {
