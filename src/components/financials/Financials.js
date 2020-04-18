@@ -59,6 +59,7 @@ class Financials extends Component{
     }
 
     render() {
+
         const {auth} = this.props;
         if(!auth.uid) return <Redirect to= '/signin'/>;
         // console.log(this.props);
@@ -181,6 +182,7 @@ const mapStateToProps = (state) =>{
     //console.log(state);
     return {
         funds: state.firestore.ordered.funds,
+        payments: state.firestore.ordered.payments,
         auth: state.firebase.auth
     };
 };
@@ -193,7 +195,20 @@ const mapDispatchToProps=(dispatch)=>{
 
 export default compose(
     connect(mapStateToProps, mapDispatchToProps),
-    firestoreConnect([
-        {collection: 'funds'}
-    ])
+    firestoreConnect(props => {
+        if (typeof props.auth.uid != "undefined"){
+            return [
+                {
+                    collection: 'payments', 
+                    where: ['uid', '==', props.auth.uid]
+                },
+                {
+                    collection: 'funds', 
+                    where: ['uid', '==', props.auth.uid]
+                }
+            ]
+        } else{
+            return []
+        }
+    })
 )(Financials)
