@@ -27,13 +27,13 @@ export const getStock = (symbol) => {
     }
 };
 
-export const getStockPrices = (symbols) => {
+export const getStockPrices = (stocks) => {
     return (dispatch, getState) => {
         let results = [];
 
-        let promiseArr = symbols.map(function (symbol) {
+        let promiseArr = stocks.map(function (stock) {
             let localUrl = new URL(apiUrl);
-            localUrl.searchParams.append("symbol", symbol);
+            localUrl.searchParams.append("symbol", stock.symbol);
             return fetch(localUrl, {
                 method: "GET"
             })
@@ -41,7 +41,8 @@ export const getStockPrices = (symbols) => {
                     response.json()
                         .then((json) => {
                             results.push({
-                                "symbol": symbol,
+                                "id": stock.id,
+                                "symbol": stock.symbol,
                                 "currentPrice": json.c,
                                 "openingPrice": json.o,
                                 "priceDiff": json.c - json.o
@@ -91,6 +92,26 @@ export const newStock = (symbol) => {
         }).catch(function (err) {
             console.log("Error getting document: ", err);
             alert("Error getting document, please contact administrator.")
+        })
+    }
+};
+
+export const deleteStocks = (symbolIDs) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
+        const firestore = getFirestore();
+        const userId = getState().firebase.auth.uid;
+        const profile = getState().firebase.profile;
+        //check if user's collection has been created
+        let stockDocRef = firestore.collection("stocks").doc(userId).collection('favoriteStocks');
+
+        symbolIDs.forEach(symbolID => {
+            let docRef = stockDocRef.doc(symbolID)
+
+            docRef.delete()
+                .then(dispatch({type: 'DELETE_STOCK'}))
+                .catch((err) => {
+                    dispatch({type: 'DELETE_STOCK_ERR'}, err)
+                })
         })
     }
 }

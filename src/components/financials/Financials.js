@@ -8,7 +8,7 @@ import FundList from './FundList'
 import CreateFund from "./CreateFund";
 import {editFund} from "../../store/actions/fundActions";
 import Select from "react-select";
-import {getStock, getStockPrices, newStock} from "../../store/actions/stockActions";
+import {getStock, getStockPrices, newStock, deleteStocks} from "../../store/actions/stockActions";
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -47,7 +47,7 @@ class Financials extends Component{
             endingTop: "10%"
         };
         materialize.Modal.init(this.newStockModal, options);
-       // materialize.Modal.init(this.deleteModal, options);
+        materialize.Modal.init(this.deleteModal, options);
 
         this.exportForm = React.createRef()
     }
@@ -98,6 +98,15 @@ class Financials extends Component{
     handleNewStock = (e) => {
         e.preventDefault();
         this.props.newStock(this.state.newSymbol)
+    }
+
+    handleDeleteStocks = (e) => {
+        e.preventDefault();
+
+        if (this.state === null || this.state.rowsSelected === undefined || this.state.rowsSelected.length === 0)
+            alert("Oops! No stock selected to delete!");
+        else
+            this.props.deleteStocks(this.state.rowsSelected);
     }
 
     handleSelectRow(transactionID, isSelect) {
@@ -203,13 +212,13 @@ class Financials extends Component{
         }
 
         if (this.props.favStocks !== undefined && (this.props.favStockPrices === null || this.props.favStocks.length !== this.props.favStockPrices.length)){ // need to get symbols' current prices
-            let symbols = []
+            let stocks = []
 
             this.props.favStocks.forEach(stock => {
-                symbols.push(stock.symbol)
+                stocks.push(stock)
             })
 
-            this.handleGetStocks(symbols)
+            this.handleGetStocks(stocks)
         }
 
         return(
@@ -309,7 +318,7 @@ class Financials extends Component{
                                         columns={this.columns}
                                         selectRow={{
                                             mode: 'checkbox',
-                                            clickToSelect: true,
+                                            // clickToSelect: true,
                                             bgColor: '#68DE11',
                                             selectColumnStyle: {
                                                 backgroundColor: '#68DE11'
@@ -329,6 +338,7 @@ class Financials extends Component{
                                 null
                                 }
                                 <button data-target={"newStockModal"} className={"btn modal-trigger green lighten-1 ms-5"}>+</button>
+                                <button data-target={"deleteModal"} className={"btn modal-trigger green lighten-1"}>Delete...</button>
                                 <div>
                                     <div ref={Modal => {
                                         this.newStockModal = Modal;
@@ -345,6 +355,29 @@ class Financials extends Component{
                                                     </div>
                                                     <button className={"modal-close btn green lighten-1"}
                                                             onClick={this.handleNewStock}>Save
+                                                    </button>
+                                                    <a className="modal-close btn grey darken-3 white-text"
+                                                       style={{"marginLeft": "2%"}}>
+                                                        Cancel
+                                                    </a>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div ref={Modal => {
+                                        this.deleteModal = Modal;
+                                    }}
+                                         id={"deleteModal"}
+                                         className={"modal"}>
+                                        <div className={"modal-content"}>
+                                            <form>
+                                                <h4 className={"grey-text text-darken-3"}>Confirm to delete?</h4>
+                                                <h6 className={"black-txt"}>This operation is irreversible.</h6>
+                                                <div className={"form-group"}>
+                                                    <button className={"modal-close btn red lighten-1"}
+                                                            onClick={this.handleDeleteStocks}>Delete
                                                     </button>
                                                     <a className="modal-close btn grey darken-3 white-text"
                                                        style={{"marginLeft": "2%"}}>
@@ -379,7 +412,8 @@ const mapDispatchToProps=(dispatch)=>{
         editFund: (fund)=> dispatch(editFund(fund)),
         getStock: (symbol) => dispatch(getStock(symbol)),
         getStocks: (symbols) => dispatch(getStockPrices(symbols)),
-        newStock: (symbol) => dispatch(newStock(symbol))
+        newStock: (symbol) => dispatch(newStock(symbol)),
+        deleteStocks: (symbolIDs) => dispatch(deleteStocks(symbolIDs))
     }
 }
 
