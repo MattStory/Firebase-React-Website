@@ -8,6 +8,8 @@ import fundReducer from './fundReducer'
 import memReducer from './memReducer';
 import msgReducer from './msgReducer';
 import transactionReducer from "./transactionReducer";
+import stockReducer from "./stockReducer";
+import favStocksReducer from "./favStocksReducer"
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -18,7 +20,9 @@ const rootReducer = combineReducers({
     fund: fundReducer,
     memo: memReducer,
     messages: msgReducer,
-    transaction: transactionReducer
+    transaction: transactionReducer,
+    stock: stockReducer,
+    favStockPrices: favStocksReducer
 });
 
 export default rootReducer
