@@ -80,9 +80,7 @@ export const newStock = (symbol) => {
             stockDocRef = stockDocRef.collection('favoriteStocks');
 
             stockDocRef.add({
-                symbol: symbol,
-                createdAt: new Date(),
-                editedAt: new Date()
+                symbol: symbol
             }).then(() => {
                 dispatch({type: 'CREATE_STOCK', symbol});
             }).catch((err) => {
@@ -96,16 +94,15 @@ export const newStock = (symbol) => {
     }
 };
 
-export const deleteStocks = (symbolIDs) => {
+export const deleteStocks = (stockIDs) => {
     return (dispatch, getState, {getFirebase, getFirestore}) => {
         const firestore = getFirestore();
         const userId = getState().firebase.auth.uid;
         const profile = getState().firebase.profile;
-        //check if user's collection has been created
         let stockDocRef = firestore.collection("stocks").doc(userId).collection('favoriteStocks');
 
-        symbolIDs.forEach(symbolID => {
-            let docRef = stockDocRef.doc(symbolID)
+        stockIDs.forEach(stockID => {
+            let docRef = stockDocRef.doc(stockID)
 
             docRef.delete()
                 .then(dispatch({type: 'DELETE_STOCK'}))
@@ -113,5 +110,23 @@ export const deleteStocks = (symbolIDs) => {
                     dispatch({type: 'DELETE_STOCK_ERR'}, err)
                 })
         })
+    }
+}
+
+export const updateStock = (stock) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
+        const firestore = getFirestore();
+        const userId = getState().firebase.auth.uid;
+        const profile = getState().firebase.profile;
+
+        let stockDocRef = firestore.collection("stocks").doc(userId).collection('favoriteStocks').doc(stock.id);
+
+        let stockUpdate = {};
+        stockUpdate[stock.dataField] = stock.newValue;
+
+        stockDocRef.update(stockUpdate)
+            .catch(err => {
+                dispatch({type: 'UPDATE_STOCK_ERR', err})
+            })
     }
 }
