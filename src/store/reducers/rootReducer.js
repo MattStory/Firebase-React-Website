@@ -9,6 +9,7 @@ import memReducer from './memReducer';
 import msgReducer from './msgReducer';
 import transactionReducer from "./transactionReducer";
 import stockReducer from "./stockReducer";
+import favStocksReducer from "./favStocksReducer"
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -20,7 +21,8 @@ const rootReducer = combineReducers({
     memo: memReducer,
     messages: msgReducer,
     transaction: transactionReducer,
-    stocks: stockReducer
+    stock: stockReducer,
+    favStockPrices: favStocksReducer
 });
 
 export default rootReducer
