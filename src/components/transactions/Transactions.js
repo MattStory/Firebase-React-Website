@@ -59,6 +59,8 @@ class Transactions extends Component {
         };
         materialize.Modal.init(this.deleteModal, options);
         materialize.Modal.init(this.exportModal, options);
+        materialize.Modal.init(this.splitModal, options)
+        materialize.Modal.init(this.newSplitAccountModal, options)
 
         this.exportForm = React.createRef()
     }
@@ -227,6 +229,22 @@ class Transactions extends Component {
     }
     ];
 
+    splitAccountColumns = [
+        {
+            dataField: 'id',
+            hidden: true
+        },
+        {
+            dataField: 'account',
+            text: 'Account',
+            sort: true
+        },
+        {
+            dataField: 'percentage',
+            text: 'Percentage'
+        }
+    ]
+
     render() {
         return (
             <div className={"container mt"}>
@@ -264,6 +282,7 @@ class Transactions extends Component {
                 <button data-target={"exportModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...
                 </button>
                 <button data-target={"deleteModal"} className={"btn modal-trigger green lighten-1"}>Delete...</button>
+                <button data-target={"splitModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Split...</button>
                 <div>
                     <div ref={Modal => {
                         this.deleteModal = Modal;
@@ -324,6 +343,55 @@ class Transactions extends Component {
 
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div ref={Modal => {
+                        this.splitModal = Modal;
+                    }}
+                         id={"splitModal"}
+                         className={"modal"}>
+                        <div className={"modal-content"} style={{"height": "100%"}}>
+                            <BootstrapTable
+                                keyField="id"
+                                data={[]}
+                                columns={this.splitAccountColumns}
+                                defaultSorted={defaultSorted}
+                                noDataIndication="No Account Configured"
+                                remote={{cellEdit: true}}
+                                onTableChange={this.onTableChange}
+                            />
+                        </div>
+                        <button data-target={"newSplitAccountModal"}
+                                className={"btn modal-trigger green lighten-1 ms-5"} style={{"margin": "10%"}}>+
+                        </button>
+                        <div>
+                            <div ref={Modal => {
+                                this.newSplitAccountModal = Modal;
+                            }}
+                                 id={"newSplitAccountModal"}
+                                 className={"modal"}>
+                                <div className={"modal-content"} style={{"maxHeight": "100%"}}>
+                                    <form>
+                                        <h4 className={"grey-text text-darken-3"}>New account to split transaction</h4>
+                                        <div className={"form-group"}>
+                                            <div className={"input-field"}>
+                                                <input type={"text"} id={'newSplitAccount'}
+                                                       required={true}/>
+                                                <label htmlFor={"newSplitAccount"}>Account</label>
+                                            </div>
+                                            <button className={"modal-close btn green lighten-1"}
+                                                    >Save
+                                            </button>
+                                            <a className="modal-close btn grey darken-3 white-text"
+                                               style={{"marginLeft": "2%"}}>
+                                                Cancel
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -339,10 +339,12 @@ class Financials extends Component {
                     </div>
                     <div className={"col s12 m6"}>
                         <div className="card z-depth-0">
+
                             <div className={"container center"}>
                                 <div className={"input-field"}>
                                     <input type={"text"} id={'symbol'} className={"center"}
-                                           onChange={this.handleChange}/>
+                                           onChange={this.handleChange} style={{"marginTop": "10%"}}/>
+                                    <label htmlFor={'symbol'} style={{"marginTop": "10%"}}>Stock Symbol to Query</label>
                                 </div>
                                 <button className={"btn green lighten-1 center"} onClick={this.handleGetStock}>Get Stock
                                     Symbol
@@ -374,10 +376,10 @@ class Financials extends Component {
                                     null
                                 }
                                 <button data-target={"newStockModal"}
-                                        className={"btn modal-trigger green lighten-1 ms-5"}>+
+                                        className={"btn modal-trigger green lighten-1 ms-5"} style={{"margin": "10%"}}>+
                                 </button>
                                 <button data-target={"deleteModal"}
-                                        className={"btn modal-trigger green lighten-1"}>Delete...
+                                        className={"btn modal-trigger green lighten-1"} style={{"margin": "10%"}}>Delete...
                                 </button>
                                 <div>
                                     <div ref={Modal => {
