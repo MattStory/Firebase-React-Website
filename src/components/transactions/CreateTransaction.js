@@ -78,9 +78,10 @@ class CreateTransaction extends Component {
 
     handleNewCustomCategory = (e) => {
         e.preventDefault();
-        this.props.newCustomCategory(this.state['new-category']);
+        this.props.newCustomCategory(this.state['new-category'], this.state['category-limit']);
         this.setState({
-            'new-category': ''
+            'new-category': '',
+            'category-limit': ''
         })
     };
 
@@ -88,6 +89,7 @@ class CreateTransaction extends Component {
 
     render() {
         let userFunds = [];
+        let categories = [];
 
         if (this.props.userFunds !== undefined) {
             this.props.userFunds.forEach(userFund => {
@@ -99,8 +101,23 @@ class CreateTransaction extends Component {
 
                 userFunds.push(formattedFund);
             })
-        } else
+        } else {
             userFunds = [{value: '', label: 'loading...'}];
+        }
+
+        if (this.props.categories !== undefined) {
+            this.props.categories.forEach(categorie => {
+                let formattedCategory = {};
+                let label = categorie.category;
+                let value = categorie.category;
+                formattedCategory['label'] = label;
+                formattedCategory['value'] = value;
+
+                categories.push(formattedCategory);
+            })
+        } else {
+            categories = [{value: '', label: 'loading...'}];
+        }
 
         return (
             <div className={"container"}>
@@ -123,37 +140,41 @@ class CreateTransaction extends Component {
                             className={"transactionCategory"}
                             name={"transactionCategory"}
                             placeholder={"Category"}
-                            options={transactionCategory}
+                            options={categories}
                             onChange={this.handleCategoryChange}
                         />
                     </div>
-                    {/*<button data-target={"newCategoryModal"} className={"btn modal-trigger green lighten-1"}>New Category</button>*/}
-                    {/*<div>*/}
-                    {/*    <div ref={Modal => {*/}
-                    {/*        this.newCategoryModal = Modal;*/}
-                    {/*    }}*/}
-                    {/*         id={"newCategoryModal"}*/}
-                    {/*         className={"modal"}>*/}
-                    {/*        <div className={"modal-content"}>*/}
-                    {/*            <form>*/}
-                    {/*                <h4 className={"grey-text text-darken-3"}>New Custom Category</h4>*/}
-                    {/*                <div className={"input-field"}>*/}
-                    {/*                    <input type={"text"} id={'new-category'} required={true} onChange={this.handleChange} value={this.state['new-category']}/>*/}
-                    {/*                    <label htmlFor={'new-category'}>Category Name</label>*/}
-                    {/*                </div>*/}
-                    {/*                <div className={"form-group"}>*/}
-                    {/*                    <button className={"modal-close btn green lighten-1"}*/}
-                    {/*                            onClick={this.handleNewCustomCategory}>Save*/}
-                    {/*                    </button>*/}
-                    {/*                    <a className="modal-close btn grey darken-3 white-text"*/}
-                    {/*                       style={{"marginLeft": "2%"}}>*/}
-                    {/*                        Cancel*/}
-                    {/*                    </a>*/}
-                    {/*                </div>*/}
-                    {/*            </form>*/}
-                    {/*        </div>*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
+                    <button data-target={"newCategoryModal"} className={"btn modal-trigger green lighten-1"}>New Category</button>
+                    <div>
+                       <div ref={Modal => {
+                            this.newCategoryModal = Modal;
+                        }}
+                             id={"newCategoryModal"}
+                            className={"modal"}>
+                            <div className={"modal-content"}>
+                               <form>
+                                    <h4 className={"grey-text text-darken-3"}>New Custom Category</h4>
+                                    <div className={"input-field"}>
+                                       <input type={"text"} id={'new-category'} required={true} onChange={this.handleChange} value={this.state['new-category']}/>
+                                        <label htmlFor={'new-category'}>Category Name</label>
+                                    </div>
+                                    <div className={"input-field"}>
+                                       <input type={"number"} id={'category-limit'} required={true} onChange={this.handleChange} value={this.state['category-limit']} min="0"/>
+                                        <label htmlFor={'category-limit'}>Spending Limit</label>
+                                    </div>
+                                   <div className={"form-group"}>
+                                        <button className={"modal-close btn green lighten-1"}
+                                                onClick={this.handleNewCustomCategory}>Save
+                                        </button>
+                                       <a className="modal-close btn grey darken-3 white-text"
+                                           style={{"marginLeft": "2%"}}>
+                                            Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div> 
                     <div className={"input-field"}>
                         <Select
                             className={"financialAccount"}
@@ -176,7 +197,7 @@ class CreateTransaction extends Component {
 const mapDispatchToProps = (dispatch) => {
     return{
         createTransaction: (transaction, history) => dispatch(createTransaction(transaction, history)),
-        newCustomCategory: (category) => dispatch(newCustomCategory(category)),
+        newCustomCategory: (category, limit) => dispatch(newCustomCategory(category, limit)),
         largeTransactionAlert: (transaction) => dispatch(largeTransactionAlert(transaction)),
         lowBalanceAlert: (transaction) => dispatch(lowBalanceAlert(transaction))
     }
@@ -185,7 +206,8 @@ const mapDispatchToProps = (dispatch) => {
 const mapStateToProps = (state) => {
     return {
         auth: state.firebase.auth,
-        userFunds: state.firestore.ordered.userFunds
+        userFunds: state.firestore.ordered.userFunds,
+        categories: state.firestore.ordered.categories
     };
 };
 
@@ -200,6 +222,11 @@ export default compose(
                         ['uid', '==', props.auth.uid]
                     ],
                     storeAs: 'userFunds'
+                }, {
+                    collection: 'transactions',
+                    doc: props.auth.uid,
+                    subcollections: [{collection: 'customCategories'}],
+                    storeAs: 'categories'
                 }
             ]
         } else {

@@ -16,6 +16,7 @@ import Transactions from "./components/transactions/Transactions";
 import CreateEditTransaction from "./components/transactions/CreateTransaction";
 import Visualizations from "./components/visualizations/chart"
 import Google from './components/auth/google'
+import Categories from './components/transactions/categories'
 
 class App extends Component {
   render(){
@@ -32,6 +33,7 @@ class App extends Component {
        <Route path ='/financials' component ={Financials}/>
        <Route path ='/transactions' component={Transactions}/>
        <Route path ='/create_transaction' component={CreateEditTransaction}/>
+       <Route path ='/categories' component={Categories}/>
        <Route path ='/profile' component ={Profile}/>
        <Route path ='/createFund' component ={createFund}/>
        <Route path ='/reset' component ={reset}/>
