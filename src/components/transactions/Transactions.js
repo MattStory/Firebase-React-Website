@@ -7,6 +7,9 @@ import './Transactions.css'
 import materialize from 'materialize-css'
 import {exportCSV, exportJSON} from "./exportTransactions";
 import {updateTransaction, deleteTransactions} from "../../store/actions/transactionActions";
+import {createTransaction} from "../../store/actions/transactionActions"
+import {addpayment} from '../../store/actions/paymentAction';
+import {deletePayment} from '../../store/actions/paymentAction';
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -18,12 +21,6 @@ import cellEditFactory, {Type} from 'react-bootstrap-table2-editor';
 // Pagination Module
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
-
-// Table Sarch Module
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit'
-import bootstrapTable from 'react-bootstrap-table-next/lib/src/bootstrap-table';
-import propsResolver from 'react-bootstrap-table-next/lib/src/props-resolver';
-const { SearchBar, ClearSearchButton } = Search;
 
 const transactionCategory = [
     {value: "Dining", label: "Dining"},
@@ -52,7 +49,7 @@ const cellEdit = {
     blurToSave: true
 };
 
-class Transactions extends Component { 
+class Transactions extends Component {
     // For Modal
     componentDidMount() {
         const options = {
@@ -67,6 +64,70 @@ class Transactions extends Component {
         materialize.Modal.init(this.exportModal, options);
 
         this.exportForm = React.createRef()
+
+
+         // ----------- Haiders code --------
+         var l;
+         console.log(this.props);
+         var today = new Date();
+         if ((today.getMonth() + 1) < 10) {
+             var todayDate = today.getFullYear() + "-" + "0" +  (today.getMonth() + 1) + "-" + today.getDate();
+         } else {
+             var todayDate = today.getFullYear() + "-" +  (today.getMonth() + 1) + "-" + today.getDate();
+         }
+         var comapare_today = todayDate.split("-");
+         console.log(comapare_today[0]);
+         console.log(comapare_today[1]);
+         console.log(comapare_today[2]);
+         comapare_today = comapare_today[2] + comapare_today[1] + comapare_today[0];
+         console.log(parseInt(comapare_today));
+         if (this.props.payments) {
+             for (var i = 0; i < this.props.payments.length; i++) {
+                 //Change the date to less then equal
+                 var comapare_payment = this.props.payments[i].date.split("-");
+                 console.log(comapare_payment[0]);
+                 console.log(comapare_payment[1]);
+                 console.log(comapare_payment[2]);
+                 comapare_payment = comapare_payment[2] + comapare_payment[1] + comapare_payment[0];
+                 console.log(parseInt(comapare_payment));
+                 console.log("Here");
+                 if (todayDate === this.props.payments[i].date || parseInt(comapare_today) > parseInt(comapare_payment) ) {
+                     console.log(this.props.payments[i].date);
+                     const obj = {
+                         amount: this.props.payments[i].amount,
+                         merchant: this.props.payments[i].title,
+                         id: this.props.payments[i].id,
+                         transactionDate: todayDate,
+                         financialAcct: this.props.payments[i].account,
+                         transactionCategory: this.props.payments[i].category,
+                         
+                     };
+                     console.log("Here wanting to create a trans");
+                     this.props.deleting(this.props.payments[i].id);
+                     this.props.createTransaction(obj,this.props.history);
+                    if ((today.getMonth() + 1) < 10) {                       
+                     var todayDate1 = today.getFullYear() + "-" + "0" +  (today.getMonth() + 2) + "-" + today.getDate();
+                 } else {
+                     var todayDate1 = today.getFullYear() + "-" +  (today.getMonth() + 2) + "-" + today.getDate();
+                 }
+                 
+                  l = {
+                     amount: this.props.payments[i].amount,
+                     account: this.props.payments[i].account,
+                     category: this.props.payments[i].category,
+                     date: todayDate1 ,
+                     title: this.props.payments[i].title,
+                 };
+                 console.log(l.date);
+                 console.log(this.props.payments[i]);
+                 console.log("i", i);
+                 this.props.addpayment(l);
+                 }
+                 // console.log("In the array", f.date);
+                 // console.log("TodayDate: ", todayDate);
+             }
+         }
+         // ----------- Haiders code --------
     }
 
     handleExport = (e) => {
@@ -163,8 +224,13 @@ class Transactions extends Component {
         }
     };
 
-    accountFormatter = (id) => {
-        let targetFund = this.props.userFunds.find(fund => fund.id === id);
+    accountFormatter = (cell) => {
+        if (this.props.userFunds === undefined)
+            return ''
+        let targetFund = this.props.userFunds.find(fund => fund.id === cell);
+        // if (targetFund === undefined){
+        //     return ''
+        // }
         return (<span>{targetFund.nickname + ' ' + targetFund.fundType}</span>)
     };
 
@@ -181,6 +247,32 @@ class Transactions extends Component {
         });
 
         return userFunds
+    }
+
+    categoryFormatter = (cell) => {
+        if (this.props.userCategories === undefined)
+            return ''
+        let targetCategory = this.props.userCategories.find(category => category.category === cell);
+        console.log("targetCategory: " + targetCategory);
+        // if (targetCategory === undefined) {
+        //     return ''
+        // }
+        return (<span>{targetCategory.category}</span>)
+    };
+
+    getCategoryOptions = () => {
+        let userCategories = [];
+        this.props.userCategories.forEach(userCategory => {
+            let formattedCategory = {};
+            let label = userCategory.category;
+            let value = userCategory.category;
+            formattedCategory['label'] = label;
+            formattedCategory['value'] = value;
+
+            userCategories.push(formattedCategory);
+        });
+
+        return userCategories
     }
 
     // Columns for table, moved here to access class methods
@@ -204,6 +296,7 @@ class Transactions extends Component {
         },
         type: 'number'
     }, {
+        /*
         dataField: 'transactionCategory',
         text: 'Category',
         sort: true,
@@ -212,6 +305,18 @@ class Transactions extends Component {
             options: transactionCategory
         },
         editorClasses: "browser-default"
+        */
+       dataField: 'transactionCategory',
+       text: 'Category',
+       sort: true,
+       formatter: this.categoryFormatter,
+       editor: {
+           type: Type.SELECT,
+           getOptions: (setOptions, {row, column}) => {
+               return this.getCategoryOptions()
+           }
+       },
+       editorClasses: "browser-default"
     }, {
         dataField: 'financialAcct',
         text: 'Account',
@@ -239,47 +344,35 @@ class Transactions extends Component {
                 <div className="card z-depth-3">
                     {this.props.transactions != null
                         ?
-                        <ToolkitProvider
+                        <BootstrapTable
                             keyField="id"
                             data={this.props.transactions}
                             columns={this.columns}
-                            search
-                        >
-                            {
-                                props => (
-                                    <div>
-                                        <SearchBar { ...props.searchProps } />
-                                        <ClearSearchButton { ...props.searchProps } />
-                                        <BootstrapTable
-                                            pagination={paginationFactory(paginationOption)}
-                                            selectRow={{
-                                                mode: 'checkbox',
-                                                //clickToSelect: true,
-                                                bgColor: '#68DE11',
-                                                selectColumnStyle: {
-                                                    backgroundColor: '#68DE11'
-                                                },
-                                                onSelect: (row, isSelect, rowIndex, e) => {
-                                                    this.handleSelectRow(row.id, isSelect)
-                                                }
-                                                //clickToEdit: true
-                                            }}
-                                            defaultSorted={defaultSorted}
-                                            cellEdit={cellEditFactory(cellEdit)}
-                                            noDataIndication="No Transactions"
-                                            remote={{cellEdit: true}}
-                                            onTableChange={this.onTableChange}
-                                            { ...props.baseProps}
-                                        />
-                                    </div>
-                                )
-                            }
-                        </ToolkitProvider>
+                            pagination={paginationFactory(paginationOption)}
+                            selectRow={{
+                                mode: 'checkbox',
+                                //clickToSelect: true,
+                                bgColor: '#68DE11',
+                                selectColumnStyle: {
+                                    backgroundColor: '#68DE11'
+                                },
+                                onSelect: (row, isSelect, rowIndex, e) => {
+                                    this.handleSelectRow(row.id, isSelect)
+                                }
+                                //clickToEdit: true
+                            }}
+                            defaultSorted={defaultSorted}
+                            cellEdit={cellEditFactory(cellEdit)}
+                            noDataIndication="No Transactions"
+                            remote={{cellEdit: true}}
+                            onTableChange={this.onTableChange}
+                        />
                         :
                         null
                     }
                 </div>
                 <Link to={"/create_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
+                <Link to={"/categories"} className={"btn modal-trigger green lighten-1 ms-5"}>Manage Categories</Link>
                 <button data-target={"exportModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...
                 </button>
                 <button data-target={"deleteModal"} className={"btn modal-trigger green lighten-1"}>Delete...</button>
@@ -354,7 +447,11 @@ class Transactions extends Component {
 const mapDispatchToProps = (dispatch) => {
     return {
         updateTransaction: (transactionToUpdate) => dispatch(updateTransaction(transactionToUpdate)),
-        deleteTransactions: (transactions) => dispatch(deleteTransactions(transactions))
+        deleteTransactions: (transactions) => dispatch(deleteTransactions(transactions)),
+        deleting : (id) => { dispatch(deletePayment(id)) },
+        addpayment: (id) => { dispatch(addpayment(id))},
+        createTransaction: (transaction, history) => dispatch(createTransaction(transaction, history)),
+
     }
 };
 
@@ -362,7 +459,9 @@ const mapStateToProps = (state) => {
     return {
         transactions: state.firestore.ordered.transactions,
         auth: state.firebase.auth,
-        userFunds: state.firestore.ordered.userFunds
+        userFunds: state.firestore.ordered.userFunds,
+        userCategories: state.firestore.ordered.userCategories,
+        payments: state.firestore.ordered.payments,
     };
 };
 
@@ -372,12 +471,18 @@ export default compose(
         if (typeof props.auth.uid != "undefined") {
             return [
                 {
+                    collection: 'transactions',
+                    doc: props.auth.uid,
+                    subcollections: [{collection: 'customCategories'}],
+                    storeAs: 'userCategories'
+                }, {
                     collection: 'funds',
                     where: [
                         ['uid', '==', props.auth.uid]
                     ],
                     storeAs: 'userFunds'
-                }, {
+                },
+                {
                     collection: 'transactions',
                     doc: props.auth.uid,
                     subcollections: [{collection: 'userTransactions'}],

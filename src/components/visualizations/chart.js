@@ -275,7 +275,7 @@ class Chart extends React.Component {
           chartDataPie[i] = {label: amount[i].transactionCategory, value: amount[i].amount };
         } else {
   //          console.log ("Before ", parseInt(chartDataPie[myMap.get(amount[i].merchant).index].value) + parseInt(amount[i].amount));
-            chartDataPie[myMap.get(amount[i].transactionCategory).index] = {label: amount[i].transactionCategory, value: (parseInt(chartDataPie[myMap.get(amount[i].transactionCategory).index].value) + parseInt(amount[i].amount))};
+            chartDataPie[myMap.get(amount[i].transactionCategory).index] = {label: amount[i].transactionCategory, value: (parseInt(chartDataPie[myMap.get(amount[i].transactionCategory).index]) + parseInt(amount[i].amount))};
         }
 
 
