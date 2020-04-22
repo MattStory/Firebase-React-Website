@@ -27,8 +27,6 @@ const Paymentfunc = (props) => {
                         <p style={{fontSize: "20px"}}>{data.amount}</p>
                         <h4 style={{fontSize: "30px"}}>Date</h4>
                         <p style={{fontSize: "20px"}}>{data.date}</p>
-                        <h4 style={{fontSize: "30px"}}>Time</h4>
-                        <p style={{fontSize: "20px"}}>{data.amount}</p>
                     </div>
                     <div className =" card-action.grey.lighten-4 grey-text">
                         <div>Posted by {data.owner}</div>
