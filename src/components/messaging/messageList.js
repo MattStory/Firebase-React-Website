@@ -51,6 +51,7 @@ const mapDispatchToProps = (dispatch) => {
         closing : (id) => { dispatch(closeTicket(id)) }
     }
 }
+
 export default compose(
     connect(null,mapDispatchToProps)
 )(MessageList)

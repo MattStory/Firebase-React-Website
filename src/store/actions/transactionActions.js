@@ -82,7 +82,7 @@ export const createTransaction = (transaction, history) => {
                         });
                         alertRef.collection("userAlerts").add({
                             category: transaction.transactionCategory,
-                            transactionAmount: transaction.amount,
+                            amount: transaction.amount,
                             limit: parseInt(doc.data().limit),
                             catSpent: newTotal,
                             alertType: "CATEGORY SPENDING ALERT"
@@ -206,8 +206,9 @@ export const updateTransaction = (transactionToUpdate) => {
                 })
             });
 
-        } else if (transactionToUpdate.dataField === 'Category') {
+        } else if (transactionToUpdate.dataField === 'transactionCategory') {
              // get original amount and category
+             console.log("UPDATING CATEGORY");
              let originalAmount = 0;
              let cat = '';
              transactionDocRef.get().then(function (doc) {
@@ -221,34 +222,40 @@ export const updateTransaction = (transactionToUpdate) => {
                     });
             }).then(() => {
                 //Update old category spending total
-                let catRef = firestore.collection("transactions").doc(userId).collection("customCategories");
-                catRef.get().then(function(querySnapshot) {
-                    querySnapshot.forEach(function(doc) {
-                        if(doc.data().category == cat) {
-                            let currentTotal = doc.data().spendingTotal;
-                            let newTotal = parseInt(currentTotal) - originalAmount;
-                            doc.ref.update({
-                                spendingTotal: newTotal
-                            })
-                        }
+                if (cat != transactionToUpdate.newValue) {
+                    let catRef = firestore.collection("transactions").doc(userId).collection("customCategories");
+                    catRef.get().then(function(querySnapshot) {
+                        querySnapshot.forEach(function(doc) {
+                            if(doc.data().category == cat) {
+                                let currentTotal = doc.data().spendingTotal;
+                                let newTotal = parseInt(currentTotal) - originalAmount;
+                                doc.ref.update({
+                                    spendingTotal: newTotal
+                                })
+                            }
+                        })
                     })
-                })
+                }
             }).then(() => {
                 //Update new category spending total
-                let catRef = firestore.collection("transactions").doc(userId).collection("customCategories");
-                catRef.get().then(function(querySnapshot) {
-                    querySnapshot.forEach(function(doc) {
-                        if(doc.data().category == transactionToUpdate.newValue) {
-                            let currentTotal = doc.data().spendingTotal;
-                            let newTotal = parseInt(currentTotal) + originalAmount;
-                            doc.ref.update({
-                                spendingTotal: newTotal
-                            })
-                        }
+                if (cat != transactionToUpdate.newValue) {
+                    let catRef = firestore.collection("transactions").doc(userId).collection("customCategories");
+                    catRef.get().then(function(querySnapshot) {
+                        querySnapshot.forEach(function(doc) {
+                            if(doc.data().category == transactionToUpdate.newValue) {
+                                let currentTotal = doc.data().spendingTotal;
+                                let newTotal = parseInt(currentTotal) + originalAmount;
+                                doc.ref.update({
+                                    spendingTotal: newTotal
+                                })
+                            }
+                        })
                     })
-                })
+                }
             })
         } else {
+            console.log("UPDATING ELSE");
+            console.log("field to update" + transactionToUpdate.dataField);
             transactionDocRef.update(transactionUpdate)
                 .catch(function (error) {
                     console.log("Error getting document:", error);
@@ -373,7 +380,7 @@ export const deleteCustomCategories = (category) => {
         const userId = getState().firebase.auth.uid;
 
         let catRef = firestore.collection("transactions").doc(userId).collection("customCategories");
-        console.log("category: " + category);
+        console.log("------------------------ RUNNING -------------------------");
         catRef.get().then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
                 if(doc.data().category == category) {
@@ -389,6 +396,7 @@ export const largeTransactionAlert = (transaction) => {
         const firestore = getFirestore();
         var largeTransactionLimit;
         const uid = getState().firebase.auth.uid;
+        let fundBalance = undefined;
 
         let docRef = firestore
             .collection("funds")
@@ -397,6 +405,7 @@ export const largeTransactionAlert = (transaction) => {
         docRef.get().then(function(doc) {
             if (doc.exists) {
                 largeTransactionLimit = parseInt(doc.data().largeTransactionLimit);
+                fundBalance = doc.data().balance;
                 console.log("large transaction limit first: " + largeTransactionLimit);
                 if (parseInt(transaction.amount) >= parseInt(largeTransactionLimit)) {
                     let alertRef = firestore
@@ -413,6 +422,7 @@ export const largeTransactionAlert = (transaction) => {
                         fund: transaction.financialAcct,
                         amount: transaction.amount,
                         limit: largeTransactionLimit,
+                        fundBalance: fundBalance,
                         alertType: "LARGE TRANSACTION"
                     })
                 }
@@ -455,7 +465,7 @@ export const lowBalanceAlert = (transaction) => {
                     });
                     alertRef.collection("userAlerts").add({
                         fund: transaction.financialAcct,
-                        transactionAmount: transaction.amount,
+                        amount: transaction.amount,
                         limit: lowBalance,
                         fundBalance: fundBalance,
                         alertType: "LOW BALANCE"

@@ -3,7 +3,6 @@ import {connect} from "react-redux";
 import {deleteCustomCategories} from "../../store/actions/transactionActions"
 import Select from 'react-select';
 import {Link} from "react-router-dom";
-import materialize from "materialize-css";
 import {firestoreConnect} from 'react-redux-firebase'
 import {compose} from 'redux'
 
@@ -22,6 +21,7 @@ class Categories extends Component {
     };
 
     handleSubmit = (e) => {
+        console.log("category: " + this.state.transactionCategory);
         if (this.state.transactionCategory === undefined) {
             alert("Please select a category!");
         } else {
@@ -34,7 +34,7 @@ class Categories extends Component {
             if (transactionCategories.includes(this.state.transactionCategory)) {
                 alert("Deletion Error - Transaction Exists with Category!");
             } else {
-                deleteCustomCategories(this.state.transactionCategory)
+                this.props.deleteCustomCategories(this.state.transactionCategory);
             }
         }
     };

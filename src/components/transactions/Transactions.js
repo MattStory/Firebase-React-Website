@@ -157,8 +157,10 @@ class Transactions extends Component {
         }
     };
 
-    accountFormatter = (id) => {
-        let targetFund = this.props.userFunds.find(fund => fund.id === id);
+    accountFormatter = (cell) => {
+        if (this.props.userFunds === undefined)
+            return ''
+        let targetFund = this.props.userFunds.find(fund => fund.id === cell);
         return (<span>{targetFund.nickname + ' ' + targetFund.fundType}</span>)
     };
 
@@ -177,8 +179,11 @@ class Transactions extends Component {
         return userFunds
     }
 
-    categoryFormatter = (id) => {
-        let targetCategory = this.props.userCategories.find(category => category.category === id);
+    categoryFormatter = (cell) => {
+        if (this.props.userCategories === undefined)
+            return ''
+        let targetCategory = this.props.userCategories.find(category => category.category === cell);
+        console.log("targetCategory: " + targetCategory);
         return (<span>{targetCategory.category}</span>)
     };
 
@@ -388,21 +393,22 @@ export default compose(
         if (typeof props.auth.uid != "undefined") {
             return [
                 {
+                    collection: 'transactions',
+                    doc: props.auth.uid,
+                    subcollections: [{collection: 'customCategories'}],
+                    storeAs: 'userCategories'
+                }, {
                     collection: 'funds',
                     where: [
                         ['uid', '==', props.auth.uid]
                     ],
                     storeAs: 'userFunds'
-                }, {
+                },
+                {
                     collection: 'transactions',
                     doc: props.auth.uid,
                     subcollections: [{collection: 'userTransactions'}],
                     storeAs: 'transactions'
-                }, {
-                    collection: 'transactions',
-                    doc: props.auth.uid,
-                    subcollections: [{collection: 'customCategories'}],
-                    storeAs: 'userCategories'
                 }
             ]
         } else {

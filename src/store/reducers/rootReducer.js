@@ -8,6 +8,7 @@ import fundReducer from './fundReducer'
 import memReducer from './memReducer';
 import msgReducer from './msgReducer';
 import transactionReducer from "./transactionReducer";
+import alertReducer from "./alertReducer";
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -18,7 +19,8 @@ const rootReducer = combineReducers({
     fund: fundReducer,
     memo: memReducer,
     messages: msgReducer,
-    transaction: transactionReducer
+    alerts: alertReducer,
+    transaction: transactionReducer,
 });
 
 export default rootReducer
