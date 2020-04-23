@@ -165,8 +165,10 @@ class Transactions extends Component {
         }
     };
 
-    accountFormatter = (id) => {
-        let targetFund = this.props.userFunds.find(fund => fund.id === id);
+    accountFormatter = (cell) => {
+        if (this.props.userFunds === undefined)
+            return ''
+        let targetFund = this.props.userFunds.find(fund => fund.id === cell);
         return (<span>{targetFund.nickname + ' ' + targetFund.fundType}</span>)
     };
 
@@ -183,6 +185,29 @@ class Transactions extends Component {
         });
 
         return userFunds
+    }
+
+    categoryFormatter = (cell) => {
+        if (this.props.userCategories === undefined)
+            return ''
+        let targetCategory = this.props.userCategories.find(category => category.category === cell);
+        console.log("targetCategory: " + targetCategory);
+        return (<span>{targetCategory.category}</span>)
+    };
+
+    getCategoryOptions = () => {
+        let userCategories = [];
+        this.props.userCategories.forEach(userCategory => {
+            let formattedCategory = {};
+            let label = userCategory.category;
+            let value = userCategory.category;
+            formattedCategory['label'] = label;
+            formattedCategory['value'] = value;
+
+            userCategories.push(formattedCategory);
+        });
+
+        return userCategories
     }
 
     // Columns for table, moved here to access class methods
@@ -206,6 +231,7 @@ class Transactions extends Component {
         },
         type: 'number'
     }, {
+        /*
         dataField: 'transactionCategory',
         text: 'Category',
         sort: true,
@@ -214,6 +240,18 @@ class Transactions extends Component {
             options: transactionCategory
         },
         editorClasses: "browser-default"
+        */
+       dataField: 'transactionCategory',
+       text: 'Category',
+       sort: true,
+       formatter: this.categoryFormatter,
+       editor: {
+           type: Type.SELECT,
+           getOptions: (setOptions, {row, column}) => {
+               return this.getCategoryOptions()
+           }
+       },
+       editorClasses: "browser-default"
     }, {
         dataField: 'financialAcct',
         text: 'Account',
@@ -298,6 +336,7 @@ class Transactions extends Component {
                     }
                 </div>
                 <Link to={"/create_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
+                <Link to={"/categories"} className={"btn modal-trigger green lighten-1 ms-5"}>Manage Categories</Link>
                 <button data-target={"exportModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...
                 </button>
                 <button data-target={"deleteModal"} className={"btn modal-trigger green lighten-1"}>Delete...</button>
@@ -430,7 +469,8 @@ const mapStateToProps = (state) => {
     return {
         transactions: state.firestore.ordered.transactions,
         auth: state.firebase.auth,
-        userFunds: state.firestore.ordered.userFunds
+        userFunds: state.firestore.ordered.userFunds,
+        userCategories: state.firestore.ordered.userCategories
     };
 };
 
@@ -440,12 +480,18 @@ export default compose(
         if (typeof props.auth.uid != "undefined") {
             return [
                 {
+                    collection: 'transactions',
+                    doc: props.auth.uid,
+                    subcollections: [{collection: 'customCategories'}],
+                    storeAs: 'userCategories'
+                }, {
                     collection: 'funds',
                     where: [
                         ['uid', '==', props.auth.uid]
                     ],
                     storeAs: 'userFunds'
-                }, {
+                },
+                {
                     collection: 'transactions',
                     doc: props.auth.uid,
                     subcollections: [{collection: 'userTransactions'}],
