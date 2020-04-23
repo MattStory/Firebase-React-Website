@@ -1,0 +1,36 @@
+import React from 'react'
+import {Link} from 'react-router-dom';
+import SignedInLinks from './SignedInLinks'
+import SignedOutLinks from './SignedOutLinks'
+import {connect} from 'react-redux'
+import DropdownButton from 'react-bootstrap/DropdownButton'
+import Dropdown from 'react-bootstrap/Dropdown'
+import './Navbar.css'
+
+const Navbar =(props) =>{
+    const {auth,profile}=props;
+    //console.log(auth);
+    const links =auth.uid? <SignedInLinks profile ={profile}/>: <SignedOutLinks/>
+    return (
+        <nav className ="nav-wrapper grey darken-3">
+            <div className ="container">
+                <Link to='/' className ="brand-logo">College Capital</Link>
+                <div id ="dropbtn">
+                <DropdownButton id="dropdown-basic-button" title="Menu">
+                    {auth.isLoaded && links}
+                    
+                </DropdownButton>
+                </div>
+            </div>
+        </nav>
+    )
+}
+
+const mapStateToProps=(state)=>{
+    return{
+        auth: state.firebase.auth,
+        profile: state.firebase.profile
+    }
+}
+
+export default connect(mapStateToProps)(Navbar)
