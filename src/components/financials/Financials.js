@@ -253,7 +253,7 @@ class Financials extends Component {
 
         return (
             <div className={"container mt-10"}>
-                <div className="card z-depth-0">
+                <div className ="card z-depth-0">
                     {this.state.showCreateFund
                         ?
                         <CreateFund
@@ -329,9 +329,7 @@ class Financials extends Component {
                                                 />
                                             </div>
                                         </form>
-                                        <button className={"btn green lighten-1"} onClick={this.handleEdit}>Edit
-                                            Account
-                                        </button>
+                                        <button className={"btn green lighten-1"} onClick={this.handleEdit}>Edit Account</button>
                                     </div>
                                 </div>
                             </div>
@@ -342,7 +340,8 @@ class Financials extends Component {
                             <div className={"container center"}>
                                 <div className={"input-field"}>
                                     <input type={"text"} id={'symbol'} className={"center"}
-                                           onChange={this.handleChange}/>
+                                           onChange={this.handleChange} style={{"marginTop": "10%"}}/>
+                                    <label htmlFor={'symbol'} style={{"marginTop": "10%"}}>Stock Symbol to Query</label>
                                 </div>
                                 <button className={"btn green lighten-1 center"} onClick={this.handleGetStock}>Get Stock
                                     Symbol
@@ -374,10 +373,10 @@ class Financials extends Component {
                                     null
                                 }
                                 <button data-target={"newStockModal"}
-                                        className={"btn modal-trigger green lighten-1 ms-5"}>+
+                                        className={"btn modal-trigger green lighten-1 ms-5"} style={{"margin": "10%"}}>+
                                 </button>
                                 <button data-target={"deleteModal"}
-                                        className={"btn modal-trigger green lighten-1"}>Delete...
+                                        className={"btn modal-trigger green lighten-1"} style={{"margin": "10%"}}>Delete...
                                 </button>
                                 <div>
                                     <div ref={Modal => {

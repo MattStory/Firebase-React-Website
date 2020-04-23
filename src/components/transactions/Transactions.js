@@ -6,7 +6,7 @@ import {Link} from "react-router-dom";
 import './Transactions.css'
 import materialize from 'materialize-css'
 import {exportCSV, exportJSON} from "./exportTransactions";
-import {updateTransaction, deleteTransactions} from "../../store/actions/transactionActions";
+import {updateTransaction, deleteTransactions, newSplitAccount} from "../../store/actions/transactionActions";
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -23,6 +23,7 @@ import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.m
 import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit'
 import bootstrapTable from 'react-bootstrap-table-next/lib/src/bootstrap-table';
 import propsResolver from 'react-bootstrap-table-next/lib/src/props-resolver';
+import Select from "react-select";
 const { SearchBar, ClearSearchButton } = Search;
 
 const transactionCategory = [
@@ -52,8 +53,15 @@ const cellEdit = {
     blurToSave: true
 };
 
-class Transactions extends Component { 
-    // For Modal
+class Transactions extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state= {
+            splitAccounts: []
+        }
+    }
+
     componentDidMount() {
         const options = {
             inDuration: 250,
@@ -65,6 +73,8 @@ class Transactions extends Component {
         };
         materialize.Modal.init(this.deleteModal, options);
         materialize.Modal.init(this.exportModal, options);
+        materialize.Modal.init(this.splitModal, options)
+        materialize.Modal.init(this.newSplitAccountModal, options)
 
         this.exportForm = React.createRef()
     }
@@ -103,6 +113,8 @@ class Transactions extends Component {
             default:
                 break;
         }
+
+        materialize.Modal.getInstance(this.exportModal).close()
     };
 
     handleExportOptionChange = (e) => {
@@ -163,9 +175,24 @@ class Transactions extends Component {
         }
     };
 
-    accountFormatter = (id) => {
-        let targetFund = this.props.userFunds.find(fund => fund.id === id);
-        return (<span>{targetFund.nickname + ' ' + targetFund.fundType}</span>)
+    accountFormatter = (accounts) => {
+        if (this.props.userFunds === undefined)
+            return ''
+
+        let funds = []
+
+        accounts.forEach(account => {
+            let targetFund = this.props.userFunds.find(fund => fund.id === account.account);
+
+            funds.push(<ul key={targetFund.id}>{targetFund.nickname} {targetFund.fundType}, {account.percentage}%</ul>)
+        })
+
+
+        return (
+            <div>
+                {funds}
+            </div>
+        )
     };
 
     getAccountOptions = () => {
@@ -182,6 +209,119 @@ class Transactions extends Component {
 
         return userFunds
     }
+
+    categoryFormatter = (cell) => {
+        if (this.props.userCategories === undefined)
+            return ''
+        let targetCategory = this.props.userCategories.find(category => category.category === cell);
+        console.log("targetCategory: " + targetCategory);
+        return (<span>{targetCategory.category}</span>)
+    };
+
+    getCategoryOptions = () => {
+        let userCategories = [];
+        this.props.userCategories.forEach(userCategory => {
+            let formattedCategory = {};
+            let label = userCategory.category;
+            let value = userCategory.category;
+            formattedCategory['label'] = label;
+            formattedCategory['value'] = value;
+
+            userCategories.push(formattedCategory);
+        });
+
+        return userCategories
+    }
+
+    handleChange = (e) => {
+        this.setState({
+            [e.target.id]: e.target.value
+        })
+    }
+
+    handleSelectChange = (selectorID, e) => {
+        let newState;
+
+        if (selectorID === 'splitAccount'){
+            newState = {
+                splitAccountID: e.value,
+                splitAccount: e.label
+            }
+        }else {
+            newState = {
+                [selectorID]: e.value
+            }
+        }
+
+
+        this.setState(newState)
+    }
+
+    handleNewSplitAccount = (e) => {
+        e.preventDefault()
+
+        let unallocatedPercentage = 100
+
+        this.state.splitAccounts.forEach(account => {
+            unallocatedPercentage -= account.percentage
+        })
+
+        if (unallocatedPercentage - this.state.splitPercentage < 0){
+            alert("The total percentage must be 100%!")
+        }else {
+            let splitAccounts = this.state.splitAccounts
+            splitAccounts.push(
+                {
+                    splitAccountID: this.state.splitAccountID,
+                    splitAccount: this.state.splitAccount,
+                    percentage: this.state.splitPercentage
+                }
+            )
+
+            this.setState({splitAccounts: splitAccounts})
+
+            materialize.Modal.getInstance(this.newSplitAccountModal).close()
+        }
+    }
+
+    clearSplitAccounts = (e) => {
+        this.setState({splitAccounts: []})
+    }
+
+    updateSplitAccounts = (e) => {
+        e.preventDefault()
+
+        let unallocatedPercentage = 100
+
+        this.state.splitAccounts.forEach(account => {
+            unallocatedPercentage -= account.percentage
+        })
+
+        if (unallocatedPercentage > 0)
+            alert("The split percentages must add up to 100%!")
+        else {
+            console.log(this.state)
+
+            let transactionToUpdate = this.props.transactions.find(transaction => transaction.id === this.state.rowsSelected[0])
+
+            this.props.newSplitAccount(this.state.splitAccounts, transactionToUpdate)
+
+            materialize.Modal.getInstance(this.splitModal).close()
+        }
+    }
+
+    closeModal = (modal) => {
+        materialize.Modal.getInstance(modal).close()
+    }
+
+    checkSelectionForSplit = () => {
+        if (this.state.rowsSelected.length > 1){
+            alert("Please only select one transaction before splitting!")
+        } else {
+            materialize.Modal.getInstance(this.splitModal).open()
+        }
+    }
+
 
     // Columns for table, moved here to access class methods
     columns = [{
@@ -204,6 +344,7 @@ class Transactions extends Component {
         },
         type: 'number'
     }, {
+        /*
         dataField: 'transactionCategory',
         text: 'Category',
         sort: true,
@@ -212,18 +353,24 @@ class Transactions extends Component {
             options: transactionCategory
         },
         editorClasses: "browser-default"
+        */
+       dataField: 'transactionCategory',
+       text: 'Category',
+       sort: true,
+       formatter: this.categoryFormatter,
+       editor: {
+           type: Type.SELECT,
+           getOptions: (setOptions, {row, column}) => {
+               return this.getCategoryOptions()
+           }
+       },
+       editorClasses: "browser-default"
     }, {
-        dataField: 'financialAcct',
+        dataField: 'financialAccounts',
         text: 'Account',
         sort: true,
         formatter: this.accountFormatter,
-        editor: {
-            type: Type.SELECT,
-            getOptions: (setOptions, {row, column}) => {
-                return this.getAccountOptions()
-            }
-        },
-        editorClasses: "browser-default"
+        editable: false
     }, {
         dataField: 'transactionDate',
         text: 'Transaction Date',
@@ -233,7 +380,38 @@ class Transactions extends Component {
     }
     ];
 
+    splitAccountColumns = [
+        {
+            dataField: 'splitAccountID',
+            hidden: true
+        },
+        {
+            dataField: 'splitAccount',
+            text: 'Account',
+            sort: true
+        },
+        {
+            dataField: 'percentage',
+            text: 'Percentage'
+        }
+    ]
+
     render() {
+        let fundOptions;
+
+        if (this.props.userFunds !== undefined){
+            fundOptions = this.props.userFunds.map(v => ({
+                label: v.fundType + ': ' + v.nickname,
+                value: v.id
+            }))
+        }
+
+        let unallocatedPercentage = 100
+
+        this.state.splitAccounts.forEach(account => {
+            unallocatedPercentage -= account.percentage
+        })
+
         return (
             <div className={"container mt"}>
                 <div className="card z-depth-3">
@@ -280,9 +458,11 @@ class Transactions extends Component {
                     }
                 </div>
                 <Link to={"/create_transaction"} className={"btn green lighten-1 center mt"}>New Transaction</Link>
+                <Link to={"/categories"} className={"btn modal-trigger green lighten-1 ms-5"}>Manage Categories</Link>
                 <button data-target={"exportModal"} className={"btn modal-trigger green lighten-1 ms-5"}>Export...
                 </button>
                 <button data-target={"deleteModal"} className={"btn modal-trigger green lighten-1"}>Delete...</button>
+                <button data-target={"splitModal"} className={"btn green lighten-1 ms-5"} onClick={this.checkSelectionForSplit}>Split...</button>
                 <div>
                     <div ref={Modal => {
                         this.deleteModal = Modal;
@@ -346,6 +526,68 @@ class Transactions extends Component {
                         </div>
                     </div>
                 </div>
+                <div>
+                    <div ref={Modal => {
+                        this.splitModal = Modal;
+                    }}
+                         id={"splitModal"}
+                         className={"modal"} style={{"height": "60%", "width": "60%"}}>
+                        <div className={"modal-content"} >
+                            <BootstrapTable
+                                keyField="splitAccount"
+                                data={this.state.splitAccounts}
+                                columns={this.splitAccountColumns}
+                                defaultSorted={defaultSorted}
+                                noDataIndication="No Account Configured"
+                                remote={{cellEdit: true}}
+                                onTableChange={this.onTableChange}
+                            />
+                        </div>
+                        <h6 style={{"margin": "5%"}}>Unallocated Percentage: {unallocatedPercentage}%</h6>
+                        <button className={"btn green lighten-1 ms-5"} onClick={this.updateSplitAccounts}>Update</button>
+                        <button data-target={"newSplitAccountModal"}
+                                className={"btn modal-trigger green lighten-1 ms-5"} style={{"margin": "10%"}}>
+                            Add Split
+                        </button>
+                        <a className="modal-close btn grey darken-3 white-text"
+                           style={{"marginLeft": "2%"}} onClick={this.clearSplitAccounts}>
+                            Close
+                        </a>
+                        <div>
+                            <div ref={Modal => {
+                                this.newSplitAccountModal = Modal;
+                            }}
+                                 id={"newSplitAccountModal"}
+                                 className={"modal"}>
+                                <div className={"modal-content"} style={{"maxHeight": "100%"}}>
+                                    <form>
+                                        <h4 className={"grey-text text-darken-3"}>New Account to Split</h4>
+                                        <div className={"form-group"}>
+                                            <Select
+                                                className={"funds"}
+                                                name={"funds"}
+                                                onChange={(e) => {this.handleSelectChange("splitAccount", e)}}
+                                                options={fundOptions}
+                                            />
+                                            <div className={"input-field"}>
+                                                <input type={"number"} id={'splitPercentage'} required={true} style={{"marginTop": "5%"}} onChange={this.handleChange}/>
+                                                <label htmlFor={'splitPercentage'} style={{"marginTop": "5%"}}>Percentage</label>
+                                            </div>
+                                            <button className={"btn green lighten-1"}
+                                                    onClick={this.handleNewSplitAccount}>
+                                                Save
+                                            </button>
+                                            <a className="btn grey darken-3 white-text"
+                                               style={{"marginLeft": "2%"}} onClick={() => this.closeModal(this.newSplitAccountModal)}>
+                                                Cancel
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -354,7 +596,8 @@ class Transactions extends Component {
 const mapDispatchToProps = (dispatch) => {
     return {
         updateTransaction: (transactionToUpdate) => dispatch(updateTransaction(transactionToUpdate)),
-        deleteTransactions: (transactions) => dispatch(deleteTransactions(transactions))
+        deleteTransactions: (transactions) => dispatch(deleteTransactions(transactions)),
+        newSplitAccount: (newAccounts, transactionToUpdate) => dispatch(newSplitAccount(newAccounts, transactionToUpdate))
     }
 };
 
@@ -362,7 +605,8 @@ const mapStateToProps = (state) => {
     return {
         transactions: state.firestore.ordered.transactions,
         auth: state.firebase.auth,
-        userFunds: state.firestore.ordered.userFunds
+        userFunds: state.firestore.ordered.userFunds,
+        userCategories: state.firestore.ordered.userCategories
     };
 };
 
@@ -372,12 +616,18 @@ export default compose(
         if (typeof props.auth.uid != "undefined") {
             return [
                 {
+                    collection: 'transactions',
+                    doc: props.auth.uid,
+                    subcollections: [{collection: 'customCategories'}],
+                    storeAs: 'userCategories'
+                }, {
                     collection: 'funds',
                     where: [
                         ['uid', '==', props.auth.uid]
                     ],
                     storeAs: 'userFunds'
-                }, {
+                },
+                {
                     collection: 'transactions',
                     doc: props.auth.uid,
                     subcollections: [{collection: 'userTransactions'}],
