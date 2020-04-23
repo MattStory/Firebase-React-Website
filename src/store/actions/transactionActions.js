@@ -161,13 +161,13 @@ export const updateTransaction = (transactionToUpdate) => {
             })
         } else if (transactionToUpdate.dataField === 'amount') {
             let originalAmount = 0;
-            let financialAcct = '';
+            let financialAccounts;
             let cat = '';
 
             // get original amount and account and category
             transactionDocRef.get().then(function (doc) {
                 originalAmount = parseFloat(doc.data().amount);
-                financialAcct = doc.data().financialAcct;
+                financialAccounts = doc.data().financialAccounts;
                 cat = doc.data().transactionCategory;
             }).then(() => {
                 // proceed to update transaction
@@ -176,18 +176,21 @@ export const updateTransaction = (transactionToUpdate) => {
                         console.log("Error getting document:", error);
                     });
 
-                // update fund account
-                let fundDocRef = firestore
-                    .collection('funds')
-                    .doc(financialAcct);
+                financialAccounts.forEach(account => {
+                    console.log(account)
+                    // update fund account
+                    let fundDocRef = firestore
+                        .collection('funds')
+                        .doc(account.account);
 
-                let fundBalance = 0;
+                    let fundBalance = 0;
 
-                fundDocRef.get().then(function (doc) {
-                    fundBalance = parseFloat(doc.data().balance)
-                }).then(() => {
-                    fundDocRef.update({
-                        balance: fundBalance + originalAmount - transactionToUpdate.newValue
+                    fundDocRef.get().then(function (doc) {
+                        fundBalance = parseFloat(doc.data().balance)
+                    }).then(() => {
+                        fundDocRef.update({
+                            balance: fundBalance + (originalAmount - transactionToUpdate.newValue) * account.percentage / 100
+                        })
                     })
                 })
             }).then(() => {
