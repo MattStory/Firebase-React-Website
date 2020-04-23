@@ -253,7 +253,7 @@ class Financials extends Component {
 
         return (
             <div className={"container mt-10"}>
-                <div className="card z-depth-0">
+                <div className ="card z-depth-0">
                     {this.state.showCreateFund
                         ?
                         <CreateFund
@@ -329,9 +329,7 @@ class Financials extends Component {
                                                 />
                                             </div>
                                         </form>
-                                        <button className={"btn green lighten-1"} onClick={this.handleEdit}>Edit
-                                            Account
-                                        </button>
+                                        <button className={"btn green lighten-1"} onClick={this.handleEdit}>Edit Account</button>
                                     </div>
                                 </div>
                             </div>
@@ -339,7 +337,6 @@ class Financials extends Component {
                     </div>
                     <div className={"col s12 m6"}>
                         <div className="card z-depth-0">
-
                             <div className={"container center"}>
                                 <div className={"input-field"}>
                                     <input type={"text"} id={'symbol'} className={"center"}

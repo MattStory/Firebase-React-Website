@@ -12,6 +12,7 @@ const SignedInLinks =(props) =>{
             <li><NavLink to='/transactions'>Transactions</NavLink></li>
             <li><NavLink to='/visualizations'>Visualizations</NavLink> </li>
             <li><NavLink to='/memos'>Memos</NavLink> </li>
+            <li><NavLink to='/recur'>Payments</NavLink> </li>
             <li><NavLink to='/profile' className ='btn btn -floating green lighten-1'>{props.profile.firstName}</NavLink></li>
             <li><NavLink to = '/signin' onClick={props.signOut} >Log Out</NavLink></li>
         </ul>
