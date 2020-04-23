@@ -280,28 +280,30 @@ export const deleteTransactions = (transactions) => {
             .doc(userId)
             .collection('userTransactions');
 
-        let amount, financialAcct, cat;
+        let amount, financialAccounts, cat;
 
         transactions.forEach(transaction => {
             docRef.doc(transaction).get().then(function (doc) {
                 amount = parseFloat(doc.data().amount);
-                financialAcct = doc.data().financialAcct;
+                financialAccounts = doc.data().financialAccounts;
                 cat = doc.data().transactionCategory;
             }).then(() => {
                 docRef.doc(transaction).delete()
                     .then(() => {
-                        // proceed to update fund
-                        let fundDocRef = firestore
-                            .collection('funds')
-                            .doc(financialAcct);
+                        financialAccounts.forEach(account => {
+                            // proceed to update fund
+                            let fundDocRef = firestore
+                                .collection('funds')
+                                .doc(account.account);
 
-                        let fundBalance;
+                            let fundBalance;
 
-                        fundDocRef.get().then(function (doc) {
-                            fundBalance = parseFloat(doc.data().balance)
-                        }).then(() => {
-                            fundDocRef.update({
-                                balance: fundBalance + amount
+                            fundDocRef.get().then(function (doc) {
+                                fundBalance = parseFloat(doc.data().balance)
+                            }).then(() => {
+                                fundDocRef.update({
+                                    balance: fundBalance + amount * account.percentage / 100
+                                })
                             })
                         })
                     })
