@@ -26,7 +26,10 @@ export const createTransaction = (transaction, history) => {
                 merchant: transaction.merchant,
                 transactionCategory: transaction.transactionCategory,
                 transactionDate: transaction.transactionDate,
-                financialAcct: transaction.financialAcct,
+                financialAccounts: [{
+                    account: transaction.financialAcct,
+                    percentage: 100
+                }],
                 createdAt: new Date(),
                 editedAt: new Date()
             }).then(() => {
@@ -476,6 +479,75 @@ export const lowBalanceAlert = (transaction) => {
             }
         }).catch(function(err) {
             console.log("Error getting doc:", err);
+        })
+    }
+}
+
+export const newSplitAccount = (newAccounts, transactionToUpdate) => {
+    return (dispatch, getState, {getFirebase, getFirestore}) => {
+        const firestore = getFirestore();
+        const userId = getState().firebase.auth.uid;
+        const profile = getState().firebase.profile;
+
+        let transactionDocRef = firestore.collection("transactions").doc(userId).collection("userTransactions").doc(transactionToUpdate.id);
+
+        let transactionDoc, financialAccounts;
+
+        transactionDocRef.get().then(function (doc) {
+            transactionDoc = doc.data()
+        }).then(() => {
+            // restore previous split accounts' balances
+            financialAccounts = transactionDoc.financialAccounts
+
+            let promiseArr = financialAccounts.map(function (account) {
+                let accountRef = firestore.collection("funds").doc(account.account)
+
+                return accountRef.get().then(function (doc) {
+                    let update = {
+                        balance: doc.data().balance + (account.percentage / 100) * transactionToUpdate.amount
+                    }
+
+                    console.log(newAccounts)
+
+                    console.log(update)
+
+                    return accountRef.update(update)
+                })
+            })
+
+            Promise.all(promiseArr).then(() => {
+                // write new split accounts to transaction
+                newAccounts = newAccounts.map(account => (
+                        {
+                            account: account.splitAccountID,
+                            percentage: account.percentage
+                        }
+                    )
+                )
+                transactionDocRef.update({
+                    financialAccounts: newAccounts
+                })
+
+                // update new accounts' balances
+
+                newAccounts.forEach(account => {
+                    console.log(account)
+                    let accountRef = firestore.collection("funds").doc(account.account)
+
+                    accountRef.get().then(function (doc) {
+                        console.log(doc.data())
+                        let update = {
+                            balance: doc.data().balance - (account.percentage / 100) * transactionToUpdate.amount
+                        }
+
+                        console.log(update)
+
+                        accountRef.update(update)
+                    })
+                })
+            })
+        }).catch((err) => {
+            dispatch('UPDATE_SPLIT_ACCOUNT_ERR', err)
         })
     }
 }
