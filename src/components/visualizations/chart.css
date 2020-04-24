@@ -1,14 +1,18 @@
-.chart{
+.chart2{
     padding-top: 40px;
     
     text-align: center;
 }
 
-.visualizations{
+.visualizations2{
     height: 95%;
     width: 800px;
     margin: 0 auto;
     margin-top: 60px;
     margin-bottom: 60px;
     background-color: black;
+}
+
+.chartbtn{
+    padding: 20px;
 }

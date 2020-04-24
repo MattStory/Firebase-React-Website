@@ -2,6 +2,7 @@
 // Include react
 import React,{Component, useState}from "react";
 import ReactDOM from "react-dom";
+import {Link} from 'react-router-dom'
 
 // Include the react-fusioncharts component
 import ReactFC from "react-fusioncharts";
@@ -264,23 +265,11 @@ class Chart extends React.Component {
     if(amount != undefined) {
       console.log(amount)
 
-      for (let i = 0; i < amount.length; i++) {
-        myMap.set(amount[i].transactionCategory, { index: 0 , value: false});
-      }
+      
 
       for (let i = 0; i < amount.length; i++) {
         //console.log(amount[i].amount);
         
-        if (!myMap.get(amount[i].transactionCategory).value) {
-          chartDataPie[i] = {label: amount[i].transactionCategory, value: amount[i].amount };
-        } else {
-  //          console.log ("Before ", parseInt(chartDataPie[myMap.get(amount[i].merchant).index].value) + parseInt(amount[i].amount));
-            chartDataPie[myMap.get(amount[i].transactionCategory).index] = {label: amount[i].transactionCategory, value: (parseInt(chartDataPie[myMap.get(amount[i].transactionCategory).index].value) + parseInt(amount[i].amount))};
-        }
-
-
-
-        myMap.set(amount[i].transactionCategory, {index :i, value : true});
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -313,6 +302,7 @@ class Chart extends React.Component {
          byMonth[date.getMonth()].value += parseInt(amount[i].amount); 
         }
         console.log(dt[1]);
+        if (month[current_Month + 1] == month[dt[0]] ) {
         if (dt[1] - 1 < 8) {
           byWeek[0].value += parseInt(amount[i].amount);
         } else if (dt[1] - 1 > 8 && dt[1] - 1 < 15) {
@@ -323,7 +313,7 @@ class Chart extends React.Component {
           byWeek[3].value += parseInt(amount[i].amount);
         } 
       }
-
+    }
    
 
     }
@@ -364,7 +354,7 @@ const chartConfigsPie = {
     // Chart Configuration
     chart: {
       //Set the chart caption
-      caption: "This Months Spending by Category",
+      caption: "Spending by Category",
       //Set the chart subcaption
       //Set the x-axis name
       xAxisName: "Spending Category",
@@ -459,18 +449,21 @@ const chartConfigsLineM = {
 };
     
     return (
-      <div className = "visualizations">
-      <div className = "chart">
-    <ReactFC {...chartConfigsPie} />);
-    </div>
-    <div className ="chart">
+      <div className = "visualizations2">
+    <div className ="chart2">
     <ReactFC {...chartConfigsLineD} />);
     </div>
-    <div className ="chart">
+    <div className ="chart2">
     <ReactFC {...chartConfigsLineW} />);
     </div>
-    <div className ="chart">
+    <div className ="chart2">
     <ReactFC {...chartConfigsLineM} />);
+    </div>
+    <div className = "chartbtn">
+    <Link to='/pastVisualizations' className ='btn btn -floating green lighten-1'>Past Spending</Link>
+    </div>
+    <div className = "chartbtn">
+    <Link to={"/future"} className={"btn green lighten-1 center mt"}>Spending Forcast</Link>
     </div>
     </div>
     )

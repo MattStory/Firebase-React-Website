@@ -48,9 +48,19 @@ class CreateTransaction extends Component {
         else if (this.state.financialAcct === undefined)
             alert("Please select a financial account! If no account is available, please add one in Financials page");
         else
+        if (this.state.fundType === "Financial Aid") {
+            if (this.state.transactionCategory === "Tuition" || this.state.transactionCategory === "Room & Board") {
+                this.props.createTransaction(this.state, this.props.history);
+                this.props.largeTransactionAlert(this.state);
+                this.props.lowBalanceAlert(this.state);
+            } else {
+                alert("Financial Aid must go towards Tuition or Room and Board!!");
+            }
+        } else {
             this.props.createTransaction(this.state, this.props.history);
             this.props.largeTransactionAlert(this.state);
             this.props.lowBalanceAlert(this.state);
+        }
     };
 
     handleCategoryChange = (e) => {
@@ -60,20 +70,21 @@ class CreateTransaction extends Component {
     };
 
     handleFinancialAcctChange = (e) => {
-        let acctBalance = 0;
-
+        let acctBalance;
+        let fundType;
+        let nickName;
         // add original account balance to state for fund update
-        for (let i = 0; i < this.props.userFunds.length; i++){
-            if (this.props.userFunds[i].id === e.value){
-                acctBalance = this.props.userFunds[i].balance;
-                break;
-            }
-        }
-
+        let targetFund = this.props.userFunds.find(fund => fund.id === e.value)
+        acctBalance = targetFund.balance;
+        fundType = targetFund.fundType;
+        nickName = targetFund.nickname;
         this.setState({
             financialAcct: e.value,
-            acctBalance: acctBalance
+            acctBalance: acctBalance,
+            fundType: fundType,
+            nickName: nickName
         });
+        console.log(this.state)
     };
 
     handleNewCustomCategory = (e) => {

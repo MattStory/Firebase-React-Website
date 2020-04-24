@@ -250,7 +250,7 @@ class Financials extends Component {
 
             this.handleGetStocks(stocks)
         }
-
+        
         return (
             <div className={"container mt-10"}>
                 <div className ="card z-depth-0">

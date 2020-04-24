@@ -2,20 +2,17 @@ const initState= {
     alerts:[{placeholder: 'placeholder'}]
 };
 
-const alertReducer = (state = [], action) => {
+const alertReducer =(state = initState, action)=>{
     switch(action.type){
-        case 'LOW_BALANCE_ALERT':
-            console.log('fund has low balance')
+        case 'DELETE_ALERT':
+            console.log('deleted alert')
             return state;
-        case 'LARGE_TRANSACTION_ALERT':
-            console.log('a large transaction was made')
-            return state;
-        case 'CLOSE_ALERT':
-            console.log('closed alert')
+        case 'DELETE_ALERT_ERR':
+            console.log("delete alert err");
             return state;
         default:
             return state;
     }
-}
+};
 
-export default alertReducer;
+export default alertReducer

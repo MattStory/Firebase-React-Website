@@ -15,8 +15,12 @@ import Messages from './components/messaging/messages'
 import Transactions from "./components/transactions/Transactions";
 import CreateEditTransaction from "./components/transactions/CreateTransaction";
 import Visualizations from "./components/visualizations/chart"
-import Payments from './components/Recurpayments/Payments'
+import pastVisualizations from "./components/visualizations/pastChart"
 import Google from './components/auth/google'
+import Categories from './components/transactions/categories'
+import payments from './components/Recurpayments/Payments'
+import Alerts from './components/alerting/alerts'
+import FutureExpenditure from './components/visualizations/futureChart'
 
 class App extends Component {
   render(){
@@ -38,9 +42,13 @@ class App extends Component {
        <Route path ='/reset' component ={reset}/>
        <Route path='/memos' component={Memos}/>
        <Route path='/messages' component={Messages}/>
-       <Route path='/recur' component={Payments}/>
        <Route path='/visualizations' component={Visualizations}/>
+       <Route path='/pastVisualizations' component={pastVisualizations}/>
+       <Route path ='/payments' component ={payments}/>
 	   <Route path='/google' component={Google}/>
+     <Route path ='/categories' component ={Categories}/>
+     <Route path ='/alerts' component = {Alerts}/>
+     <Route path='/future' component={FutureExpenditure}/>
      </Switch>
     </div>
     </BrowserRouter>
