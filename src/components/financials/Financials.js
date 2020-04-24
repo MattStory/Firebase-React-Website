@@ -250,6 +250,12 @@ class Financials extends Component {
 
             this.handleGetStocks(stocks)
         }
+
+        let completeFavStockPrices = []
+        if (this.props.favStocks !== undefined && this.props.favStockPrices !== null && this.props.favStocks.length === this.props.favStockPrices.length)
+            completeFavStockPrices = this.props.favStockPrices
+
+        console.log(completeFavStockPrices)
         
         return (
             <div className={"container mt-10"}>
@@ -349,11 +355,11 @@ class Financials extends Component {
                                 <div>
                                     {queriedStock}
                                 </div>
-                                {this.props.favStockPrices !== null
+                                {completeFavStockPrices !== []
                                     ?
                                     <BootstrapTable
                                         keyField="id"
-                                        data={this.props.favStockPrices}
+                                        data={completeFavStockPrices}
                                         columns={this.columns}
                                         selectRow={{
                                             mode: 'checkbox',
