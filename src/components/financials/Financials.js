@@ -240,7 +240,10 @@ class Financials extends Component {
             </div>
         }
 
+        let completeFavStockPrices = null
+
         if ((this.props.favStocks !== undefined && this.props.favStockPrices === null) || this.lastFavStocks !== this.props.favStocks) { // need to get symbols' current prices
+            console.log("Updating")
             let stocks = []
             this.lastFavStocks = this.props.favStocks
 
@@ -249,11 +252,15 @@ class Financials extends Component {
             })
 
             this.handleGetStocks(stocks)
+            completeFavStockPrices = null
         }
 
-        let completeFavStockPrices = []
-        if (this.props.favStocks !== undefined && this.props.favStockPrices !== null && this.props.favStocks.length === this.props.favStockPrices.length)
+
+        if (this.props.favStocks !== undefined && this.props.favStockPrices !== null && this.props.favStocks.length === this.props.favStockPrices.length){
+            console.log("Update display")
             completeFavStockPrices = this.props.favStockPrices
+        }
+
 
         console.log(completeFavStockPrices)
         
@@ -355,35 +362,37 @@ class Financials extends Component {
                                 <div>
                                     {queriedStock}
                                 </div>
-                                {completeFavStockPrices !== []
+                                {completeFavStockPrices !== null
                                     ?
-                                    <BootstrapTable
-                                        keyField="id"
-                                        data={completeFavStockPrices}
-                                        columns={this.columns}
-                                        selectRow={{
-                                            mode: 'checkbox',
-                                            // clickToSelect: true,
-                                            bgColor: '#68DE11',
-                                            selectColumnStyle: {
-                                                backgroundColor: '#68DE11'
-                                            },
-                                            onSelect: (row, isSelect, rowIndex, e) => {
-                                                this.handleSelectRow(row.id, isSelect)
-                                            }
-                                        }}
-                                        defaultSorted={defaultSorted}
-                                        noDataIndication="No Stocks"
-                                    />
+                                    <div>
+                                        <BootstrapTable
+                                            keyField="id"
+                                            data={completeFavStockPrices}
+                                            columns={this.columns}
+                                            selectRow={{
+                                                mode: 'checkbox',
+                                                // clickToSelect: true,
+                                                bgColor: '#68DE11',
+                                                selectColumnStyle: {
+                                                    backgroundColor: '#68DE11'
+                                                },
+                                                onSelect: (row, isSelect, rowIndex, e) => {
+                                                    this.handleSelectRow(row.id, isSelect)
+                                                }
+                                            }}
+                                            defaultSorted={defaultSorted}
+                                            noDataIndication="No Stocks"
+                                        />
+                                        <button data-target={"newStockModal"}
+                                                className={"btn modal-trigger green lighten-1 ms-5"} style={{"margin": "10%"}}>+
+                                        </button>
+                                        <button data-target={"deleteModal"}
+                                                className={"btn modal-trigger green lighten-1"} style={{"margin": "10%"}}>Delete...
+                                        </button>
+                                    </div>
                                     :
-                                    null
+                                    <span>Updating...</span>
                                 }
-                                <button data-target={"newStockModal"}
-                                        className={"btn modal-trigger green lighten-1 ms-5"} style={{"margin": "10%"}}>+
-                                </button>
-                                <button data-target={"deleteModal"}
-                                        className={"btn modal-trigger green lighten-1"} style={{"margin": "10%"}}>Delete...
-                                </button>
                                 <div>
                                     <div ref={Modal => {
                                         this.newStockModal = Modal;
