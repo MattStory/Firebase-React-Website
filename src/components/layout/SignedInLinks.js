@@ -2,21 +2,25 @@ import React, { Profiler } from 'react'
 import {NavLink} from 'react-router-dom';
 import {connect} from 'react-redux'
 import {signOut} from '../../store/actions/authActions'
+import Dropdown from 'react-bootstrap/Dropdown'
+
+
+
 const SignedInLinks =(props) =>{
     
     return (
-        <ul className ="right">
-            <li><NavLink to='/messages'>Support</NavLink></li>
-            <li><NavLink to='/alerts'>Alerts</NavLink></li>
-            <li><NavLink to='/create'>New Post</NavLink></li>
-            <li><NavLink to='/financials'>Financials</NavLink></li>
-            <li><NavLink to='/transactions'>Transactions</NavLink></li>
-            <li><NavLink to='/visualizations'>Visualizations</NavLink> </li>
-            <li><NavLink to='/memos'>Memos</NavLink> </li>
-            <li><NavLink to='/recur'>Payments</NavLink> </li>
-            <li><NavLink to='/profile' className ='btn btn -floating green lighten-1'>{props.profile.firstName}</NavLink></li>
-            <li><NavLink to = '/signin' onClick={props.signOut} >Log Out</NavLink></li>
-        </ul>
+        <div id ="signedIn">
+            <Dropdown.Item><NavLink to='/messages'  className ='btn btn -floating green lighten-1'>Support</NavLink></Dropdown.Item>
+            <Dropdown.Item><NavLink to='/create'  className ='btn btn -floating green lighten-1'>New Post</NavLink></Dropdown.Item>
+            <Dropdown.Item><NavLink to='/alerts'  className ='btn btn -floating green lighten-1'>Alerts</NavLink></Dropdown.Item>
+            <Dropdown.Item><NavLink to='/financials'  className ='btn btn -floating green lighten-1'>Financials</NavLink></Dropdown.Item>
+            <Dropdown.Item><NavLink to='/transactions'  className ='btn btn -floating green lighten-1'>Transactions</NavLink></Dropdown.Item>
+            <Dropdown.Item><NavLink to='/payments'  className ='btn btn -floating green lighten-1'>Payments</NavLink></Dropdown.Item>
+            <Dropdown.Item><NavLink to='/visualizations'  className ='btn btn -floating green lighten-1'>Visualizations</NavLink> </Dropdown.Item>
+            <Dropdown.Item><NavLink to='/memos'  className ='btn btn -floating green lighten-1'>Memos</NavLink> </Dropdown.Item>
+            <Dropdown.Item><NavLink to='/profile' className ='btn btn -floating green lighten-1'>Profile</NavLink></Dropdown.Item>
+            <Dropdown.Item><NavLink to = '/signin' className ='btn btn -floating green lighten-1' onClick={props.signOut} >Log Out</NavLink></Dropdown.Item>
+        </div>
     )
 }
 const mapDispatchToProps= (dispatch)=>{

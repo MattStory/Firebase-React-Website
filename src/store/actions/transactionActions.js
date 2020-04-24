@@ -427,7 +427,7 @@ export const largeTransactionAlert = (transaction) => {
                         } 
                     });
                     alertRef.collection("userAlerts").add({
-                        fund: transaction.financialAcct,
+                        fund: transaction.nickName,
                         amount: transaction.amount,
                         limit: largeTransactionLimit,
                         fundBalance: fundBalance,
@@ -472,7 +472,7 @@ export const lowBalanceAlert = (transaction) => {
                         } 
                     });
                     alertRef.collection("userAlerts").add({
-                        fund: transaction.financialAcct,
+                        fund: transaction.nickName,
                         amount: transaction.amount,
                         limit: lowBalance,
                         fundBalance: fundBalance,

@@ -7,7 +7,13 @@ import './Transactions.css'
 import materialize from 'materialize-css'
 import {exportCSV, exportJSON} from "./exportTransactions";
 import {updateTransaction, deleteTransactions, newSplitAccount} from "../../store/actions/transactionActions";
-
+import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit'
+import bootstrapTable from 'react-bootstrap-table-next/lib/src/bootstrap-table';
+import propsResolver from 'react-bootstrap-table-next/lib/src/props-resolver';
+import Select from "react-select";
+import {createTransaction} from "../../store/actions/transactionActions"
+import {addpayment} from '../../store/actions/paymentAction';
+import {deletePayment} from '../../store/actions/paymentAction';
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -18,14 +24,7 @@ import cellEditFactory, {Type} from 'react-bootstrap-table2-editor';
 // Pagination Module
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
-
-// Table Sarch Module
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit'
-import bootstrapTable from 'react-bootstrap-table-next/lib/src/bootstrap-table';
-import propsResolver from 'react-bootstrap-table-next/lib/src/props-resolver';
-import Select from "react-select";
 const { SearchBar, ClearSearchButton } = Search;
-
 const transactionCategory = [
     {value: "Dining", label: "Dining"},
     {value: "Travel", label: "Travel"},
@@ -54,14 +53,21 @@ const cellEdit = {
 };
 
 class Transactions extends Component {
+    // For Modal
     constructor(props) {
-        super(props);
-
-        this.state= {
-            splitAccounts: []
-        }
-    }
-
+        	
+            // For Modal
+        	
+                super(props);
+        	
+        	
+                this.state= {
+        	
+                    splitAccounts: []
+        	
+                }
+        	
+            }
     componentDidMount() {
         const options = {
             inDuration: 250,
@@ -77,6 +83,68 @@ class Transactions extends Component {
         materialize.Modal.init(this.newSplitAccountModal, options)
 
         this.exportForm = React.createRef()
+        // ----------- Haiders code --------
+        var l;
+        console.log(this.props);
+        var today = new Date();
+        if ((today.getMonth() + 1) < 10) {
+            var todayDate = today.getFullYear() + "-" + "0" +  (today.getMonth() + 1) + "-" + today.getDate();
+        } else {
+            var todayDate = today.getFullYear() + "-" +  (today.getMonth() + 1) + "-" + today.getDate();
+        }
+        var comapare_today = todayDate.split("-");
+        console.log(comapare_today[0]);
+        console.log(comapare_today[1]);
+        console.log(comapare_today[2]);
+        comapare_today = comapare_today[2] + comapare_today[1] + comapare_today[0];
+        console.log(parseInt(comapare_today));
+        if (this.props.payments) {
+            for (var i = 0; i < this.props.payments.length; i++) {
+                //Change the date to less then equal
+                var comapare_payment = this.props.payments[i].date.split("-");
+                console.log(comapare_payment[0]);
+                console.log(comapare_payment[1]);
+                console.log(comapare_payment[2]);
+                comapare_payment = comapare_payment[2] + comapare_payment[1] + comapare_payment[0];
+                console.log(parseInt(comapare_payment));
+                console.log("Here");
+                if (todayDate === this.props.payments[i].date || parseInt(comapare_today) > parseInt(comapare_payment) ) {
+                    console.log(this.props.payments[i].date);
+                    const obj = {
+                        amount: this.props.payments[i].amount,
+                        merchant: this.props.payments[i].title,
+                        id: this.props.payments[i].id,
+                        transactionDate: todayDate,
+                        financialAcct: this.props.payments[i].account,
+                        transactionCategory: this.props.payments[i].category,
+                        
+                    };
+                    console.log("Here wanting to create a trans");
+                    this.props.deleting(this.props.payments[i].id);
+                    this.props.createTransaction(obj,this.props.history);
+                   if ((today.getMonth() + 1) < 10) {                       
+                    var todayDate1 = today.getFullYear() + "-" + "0" +  (today.getMonth() + 2) + "-" + today.getDate();
+                } else {
+                    var todayDate1 = today.getFullYear() + "-" +  (today.getMonth() + 2) + "-" + today.getDate();
+                }
+                
+                 l = {
+                    amount: this.props.payments[i].amount,
+                    account: this.props.payments[i].account,
+                    category: this.props.payments[i].category,
+                    date: todayDate1 ,
+                    title: this.props.payments[i].title,
+                };
+                console.log(l.date);
+                console.log(this.props.payments[i]);
+                console.log("i", i);
+                this.props.addpayment(l);
+                }
+                // console.log("In the array", f.date);
+                // console.log("TodayDate: ", todayDate);
+            }
+        }
+        //______________________________Haiders Code
     }
 
     handleExport = (e) => {
@@ -113,8 +181,8 @@ class Transactions extends Component {
             default:
                 break;
         }
-
         materialize.Modal.getInstance(this.exportModal).close()
+
     };
 
     handleExportOptionChange = (e) => {
@@ -232,7 +300,6 @@ class Transactions extends Component {
 
         return userCategories
     }
-
     handleChange = (e) => {
         this.setState({
             [e.target.id]: e.target.value
@@ -322,7 +389,6 @@ class Transactions extends Component {
         }
     }
 
-
     // Columns for table, moved here to access class methods
     columns = [{
         dataField: 'id',
@@ -370,7 +436,7 @@ class Transactions extends Component {
         text: 'Account',
         sort: true,
         formatter: this.accountFormatter,
-        editable: false
+        editable:false
     }, {
         dataField: 'transactionDate',
         text: 'Transaction Date',
@@ -395,7 +461,6 @@ class Transactions extends Component {
             text: 'Percentage'
         }
     ]
-
     render() {
         let fundOptions;
 
@@ -411,7 +476,7 @@ class Transactions extends Component {
         this.state.splitAccounts.forEach(account => {
             unallocatedPercentage -= account.percentage
         })
-
+        
         return (
             <div className={"container mt"}>
                 <div className="card z-depth-3">
@@ -588,6 +653,46 @@ class Transactions extends Component {
                         </div>
                     </div>
                 </div>
+                <div>
+                    <div ref={Modal => {
+                        this.exportModal = Modal;
+                    }}
+                         id={"exportModal"}
+                         className={"modal"}>
+                        <div className={"modal-content"}>
+                            <form ref={this.exportForm}>
+                                <h4 className={"grey-text text-darken-3"}>Export Options</h4>
+                                <div>
+                                    <label>
+                                        <input className={"with-gap"} name={"optionGroup"} id="json" value="json"
+                                               type="radio" onChange={this.handleExportOptionChange} required={true}/>
+                                        <span>JSON</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label>
+                                        <input className={"with-gap"} name={"optionGroup"} id="csv" value="csv"
+                                               onChange={this.handleExportOptionChange} type="radio"/>
+                                        <span>CSV</span>
+                                    </label>
+                                </div>
+                                <button id={"export-all"} type={"submit"} className={"btn green lighten-1"}
+                                        onClick={this.handleExport}>Export All
+                                </button>
+                                <button id={"export-selected"} className={"btn green lighten-1 ms-5"}
+                                        onClick={this.handleExport}>Export Selected
+                                </button>
+                                <a className="modal-close btn grey darken-3 white-text"
+                                   style={{"marginLeft": "2%"}}>
+                                    Close
+                                </a>
+                                <div className={"form-group"}>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -597,7 +702,10 @@ const mapDispatchToProps = (dispatch) => {
     return {
         updateTransaction: (transactionToUpdate) => dispatch(updateTransaction(transactionToUpdate)),
         deleteTransactions: (transactions) => dispatch(deleteTransactions(transactions)),
-        newSplitAccount: (newAccounts, transactionToUpdate) => dispatch(newSplitAccount(newAccounts, transactionToUpdate))
+        newSplitAccount: (newAccounts, transactionToUpdate) => dispatch(newSplitAccount(newAccounts, transactionToUpdate)),
+        deleting : (id) => { dispatch(deletePayment(id)) },
+        addpayment: (id) => { dispatch(addpayment(id))},
+        createTransaction: (transaction, history) => dispatch(createTransaction(transaction, history))
     }
 };
 
@@ -606,7 +714,8 @@ const mapStateToProps = (state) => {
         transactions: state.firestore.ordered.transactions,
         auth: state.firebase.auth,
         userFunds: state.firestore.ordered.userFunds,
-        userCategories: state.firestore.ordered.userCategories
+        userCategories: state.firestore.ordered.userCategories,
+        payments: state.firestore.ordered.payments
     };
 };
 

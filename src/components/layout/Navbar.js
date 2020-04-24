@@ -3,6 +3,9 @@ import {Link} from 'react-router-dom';
 import SignedInLinks from './SignedInLinks'
 import SignedOutLinks from './SignedOutLinks'
 import {connect} from 'react-redux'
+import DropdownButton from 'react-bootstrap/DropdownButton'
+import Dropdown from 'react-bootstrap/Dropdown'
+import './Navbar.css'
 
 const Navbar =(props) =>{
     const {auth,profile}=props;
@@ -11,8 +14,13 @@ const Navbar =(props) =>{
     return (
         <nav className ="nav-wrapper grey darken-3">
             <div className ="container">
-                <Link to='/' className ="brand-logo">College Capital</Link>
-                {auth.isLoaded && links}
+                <Link to='/' className ="brand-logo">CC</Link>
+                <div id ="dropbtn">
+                <DropdownButton id="dropdown-basic-button" title="Menu">
+                    {auth.isLoaded && links}
+                    
+                </DropdownButton>
+                </div>
             </div>
         </nav>
     )
