@@ -50,8 +50,12 @@ export const createTransaction = (transaction, history) => {
 
         let fundDocRef = firestore.collection("funds").doc(transaction.financialAcct);
 
+        console.log("transaction.financialAcct",transaction.financialAcct);
+        console.log("transaction.acctBalance", transaction.acctBalance);
+        console.log("transaction.amount", transaction.amount);
+
         fundDocRef.update({
-            balance: transaction.acctBalance - transaction.amount
+            balance: parseInt(transaction.acctBalance) - parseInt(transaction.amount)
         }).catch(function (error) {
             console.log("Error updating document:", error);
         });

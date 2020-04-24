@@ -35,7 +35,7 @@ class Payments extends Component {
     state = {
         title : "",
         amount: "",
-        account: "",
+        financialAcct: "",
         category:"", 
         date : "",
         //time: "",
@@ -54,6 +54,7 @@ class Payments extends Component {
     }
 
     handleFinancialAcctChange = (e) => {
+        /*
         let acctBalance = 0;
         // add original account balance to state for fund update
         for (let i = 0; i < this.props.userFunds.length; i++){
@@ -66,57 +67,49 @@ class Payments extends Component {
             account: e.value,
             acctBalance: acctBalance
         });
+        */
+       let acctBalance;
+       let fundType;
+       let nickName;
+       // add original account balance to state for fund update
+       let targetFund = this.props.userFunds.find(fund => fund.id === e.value)
+       acctBalance = targetFund.balance;
+       fundType = targetFund.fundType;
+       nickName = targetFund.nickname;
+       this.setState({
+           financialAcct: e.value,
+           acctBalance: acctBalance,
+           fundType: fundType,
+           nickName: nickName
+       });
+       console.log(this.state)
     };
-
-    // checkTime = (time) => {
-    //     console.log("In the function");
-    //     const regex = /[0-9]{2}\:[0-9]{2}/;
-    //     if (time.match(regex)){
-    //         console.log("Caught");
-    //         return true;
-    //     } else {
-    //         console.log ("fucked");
-    //         return false;
-    //     }
-    // }
-
-    // checkAccount = (account) => {
-    //     // console.log(this.props.funds);
-    //     var flag = false;
-    //     if (this.props.funds) {
-    //          this.props.funds.map(funds => {
-    //             if (funds.fundType === account) {
-    //                 flag = true;
-    //             }
-    //         })
-    //     }
-    //     return flag;
-    // }
 
 
     handelSubmit = (event) => {
         event.preventDefault();
-        // if (!this.checkAccount(this.state.account)) {
-        //     console.log ("fUcKeD aGaIn")
-        //     window.alert("This fund type does not exsist please enter an exsisting account");
-        //     this.setState({
-        //         account: "",
-        //     })
-        // } else { 
-            this.setState({
-                ...this.state,
-                nickname: this.state.title,
-            })
+        this.setState({
+            ...this.state,
+        })
+        if (this.state.fundType === "Financial Aid") {
+            if (this.state.category === "Tuition" || this.state.category === "Room & Board") {
                 this.props.addpayment(this.state);
-                this.setState ({
-                    title : "",
-                    amount: "",
-                    account: "", 
-                    date : "",
-                    category:"", 
-                });
                 window.alert("Your Recurring Payment is going to start from the next date.")
-    
+            } else {
+                alert("Financial Aid must go towards Tuition or Room and Board!!");
+            }
+        } else {
+            this.props.addpayment(this.state);
+            window.alert("Your Recurring Payment is going to start from the next date.")
+        }
+        //this.props.addpayment(this.state);
+        this.setState ({
+            title : "",
+            amount: "",
+            financialAcct: "", 
+            date : "",
+            category:"", 
+        });
 }
 
     

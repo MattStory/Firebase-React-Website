@@ -6,7 +6,7 @@ import {Link} from "react-router-dom";
 import './Transactions.css'
 import materialize from 'materialize-css'
 import {exportCSV, exportJSON} from "./exportTransactions";
-import {updateTransaction, deleteTransactions, newSplitAccount} from "../../store/actions/transactionActions";
+import {updateTransaction, deleteTransactions, newSplitAccount, largeTransactionAlert, lowBalanceAlert} from "../../store/actions/transactionActions";
 import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit'
 import bootstrapTable from 'react-bootstrap-table-next/lib/src/bootstrap-table';
 import propsResolver from 'react-bootstrap-table-next/lib/src/props-resolver';
@@ -108,20 +108,28 @@ class Transactions extends Component {
                 comapare_payment = comapare_payment[2] + comapare_payment[1] + comapare_payment[0];
                 console.log(parseInt(comapare_payment));
                 console.log("Here");
+                console.log("---------------------------- TRIGGERING FIRST ----------------------------------");
+                console.log(todayDate);
+                console.log(comapare_today);
+                console.log(this.props.payments[i].date);
                 if (todayDate === this.props.payments[i].date || parseInt(comapare_today) > parseInt(comapare_payment) ) {
-                    console.log(this.props.payments[i].date);
+                    console.log(this.props.payments[i]);
+                    console.log("---------------------------- TRIGGERING ----------------------------------");
                     const obj = {
-                        amount: this.props.payments[i].amount,
+                        amount: parseInt(this.props.payments[i].amount),
                         merchant: this.props.payments[i].title,
                         id: this.props.payments[i].id,
                         transactionDate: todayDate,
-                        financialAcct: this.props.payments[i].account,
+                        financialAcct: this.props.payments[i].financialAcct,
                         transactionCategory: this.props.payments[i].category,
-                        
+                        acctBalance: this.props.payments[i].acctBalance
                     };
                     console.log("Here wanting to create a trans");
                     this.props.deleting(this.props.payments[i].id);
+                    console.log(obj);
                     this.props.createTransaction(obj,this.props.history);
+                    this.props.largeTransactionAlert(obj);
+                    this.props.lowBalanceAlert(obj);
                    if ((today.getMonth() + 1) < 10) {                       
                     var todayDate1 = today.getFullYear() + "-" + "0" +  (today.getMonth() + 2) + "-" + today.getDate();
                 } else {
@@ -130,11 +138,12 @@ class Transactions extends Component {
                 
                  l = {
                     amount: this.props.payments[i].amount,
-                    account: this.props.payments[i].account,
+                    financialAcct: this.props.payments[i].financialAcct,
                     category: this.props.payments[i].category,
                     date: todayDate1 ,
                     title: this.props.payments[i].title,
                 };
+                console.log(l);
                 console.log(l.date);
                 console.log(this.props.payments[i]);
                 console.log("i", i);
@@ -705,7 +714,9 @@ const mapDispatchToProps = (dispatch) => {
         newSplitAccount: (newAccounts, transactionToUpdate) => dispatch(newSplitAccount(newAccounts, transactionToUpdate)),
         deleting : (id) => { dispatch(deletePayment(id)) },
         addpayment: (id) => { dispatch(addpayment(id))},
-        createTransaction: (transaction, history) => dispatch(createTransaction(transaction, history))
+        createTransaction: (transaction, history) => dispatch(createTransaction(transaction, history)),
+        largeTransactionAlert: (transaction) => dispatch(largeTransactionAlert(transaction)),
+        lowBalanceAlert: (transaction) => dispatch(lowBalanceAlert(transaction))
     }
 };
 
