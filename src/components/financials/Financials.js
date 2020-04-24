@@ -166,14 +166,14 @@ class Financials extends Component {
         {
             dataField: 'symbol',
             sort: true,
-            text: ''
+            text: 'Symbol'
         },
         {
             dataField: 'currentPrice',
             formatter: (cell) => {
                 return '$' + cell.toFixed(2)
             },
-            text: '',
+            text: 'Current Price',
             editable: false
         },
         {
@@ -194,7 +194,7 @@ class Financials extends Component {
                     )
                 }
             },
-            text: '',
+            text: 'Since Open',
             editable: false
         }
     ]
