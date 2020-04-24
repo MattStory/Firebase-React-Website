@@ -84,7 +84,6 @@ class CreateTransaction extends Component {
             fundType: fundType,
             nickName: nickName
         });
-        console.log(this.state)
     };
 
     handleNewCustomCategory = (e) => {
@@ -185,7 +184,7 @@ class CreateTransaction extends Component {
                                 </form>
                             </div>
                         </div>
-                    </div> 
+                    </div>
                     <div className={"input-field"}>
                         <Select
                             className={"financialAccount"}
