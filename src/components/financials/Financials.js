@@ -8,7 +8,7 @@ import FundList from './FundList'
 import CreateFund from "./CreateFund";
 import {editFund} from "../../store/actions/fundActions";
 import Select from "react-select";
-import {getStock, getStockPrices, newStock, deleteStocks, updateStock} from "../../store/actions/stockActions";
+import {getStock, newStock, getStockPrices, deleteStocks, updateStock} from "../../store/actions/stockActions";
 
 // Basic Table Module
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -34,7 +34,8 @@ class Financials extends Component {
         super(props);
         this.state = {
             showCreateFund: false,
-            showEditFund: false
+            showEditFund: false,
+            completeFavStockPrices: []
         };
     }
 
@@ -248,15 +249,27 @@ class Financials extends Component {
                 stocks.push(stock)
             })
 
-            this.handleGetStocks(stocks)
+            let apiUrl = "https://finnhub.io/api/v1/quote?token=bq4lq1frh5rc5os3t7vg"
+
+            let results = []
+
+            stocks.forEach(stock => {
+                let localUrl = new URL(apiUrl);
+                localUrl.searchParams.append("symbol", stock.symbol);
+                fetch(localUrl, {method: "GET"})
+                    .then(response => response.json())
+                    .then(json => {
+                        results.push({
+                            "id": stock.id,
+                            "symbol": stock.symbol,
+                            "currentPrice": json.c,
+                            "openingPrice": json.o,
+                            "priceDiff": json.c - json.o
+                        })
+                        this.setState({completeFavStockPrices: results})
+                    })
+            })
         }
-
-        let completeFavStockPrices = []
-        if (this.props.favStocks !== undefined && this.props.favStockPrices !== null && this.props.favStocks.length === this.props.favStockPrices.length)
-            completeFavStockPrices = this.props.favStockPrices
-
-        console.log(completeFavStockPrices)
-        
         return (
             <div className={"container mt-10"}>
                 <div className ="card z-depth-0">
@@ -355,35 +368,37 @@ class Financials extends Component {
                                 <div>
                                     {queriedStock}
                                 </div>
-                                {completeFavStockPrices !== []
+                                {this.state.completeFavStockPrices !== []
                                     ?
-                                    <BootstrapTable
-                                        keyField="id"
-                                        data={completeFavStockPrices}
-                                        columns={this.columns}
-                                        selectRow={{
-                                            mode: 'checkbox',
-                                            // clickToSelect: true,
-                                            bgColor: '#68DE11',
-                                            selectColumnStyle: {
-                                                backgroundColor: '#68DE11'
-                                            },
-                                            onSelect: (row, isSelect, rowIndex, e) => {
-                                                this.handleSelectRow(row.id, isSelect)
-                                            }
-                                        }}
-                                        defaultSorted={defaultSorted}
-                                        noDataIndication="No Stocks"
-                                    />
+                                    <div style={{"marginTop": "10%"}}>
+                                        <BootstrapTable
+                                            keyField="id"
+                                            data={this.state.completeFavStockPrices}
+                                            columns={this.columns}
+                                            selectRow={{
+                                                mode: 'checkbox',
+                                                // clickToSelect: true,
+                                                bgColor: '#68DE11',
+                                                selectColumnStyle: {
+                                                    backgroundColor: '#68DE11'
+                                                },
+                                                onSelect: (row, isSelect, rowIndex, e) => {
+                                                    this.handleSelectRow(row.id, isSelect)
+                                                }
+                                            }}
+                                            defaultSorted={defaultSorted}
+                                            noDataIndication="No Stocks"
+                                        />
+                                        <button data-target={"newStockModal"}
+                                                className={"btn modal-trigger green lighten-1 ms-5"} style={{"margin": "10%"}}>+
+                                        </button>
+                                        <button data-target={"deleteModal"}
+                                                className={"btn modal-trigger green lighten-1"} style={{"margin": "10%"}}>Delete...
+                                        </button>
+                                    </div>
                                     :
-                                    null
+                                    <span>Updating...</span>
                                 }
-                                <button data-target={"newStockModal"}
-                                        className={"btn modal-trigger green lighten-1 ms-5"} style={{"margin": "10%"}}>+
-                                </button>
-                                <button data-target={"deleteModal"}
-                                        className={"btn modal-trigger green lighten-1"} style={{"margin": "10%"}}>Delete...
-                                </button>
                                 <div>
                                     <div ref={Modal => {
                                         this.newStockModal = Modal;
@@ -449,7 +464,7 @@ const mapStateToProps = (state) => {
         auth: state.firebase.auth,
         stock: state.stock,
         favStocks: state.firestore.ordered.favStocks,
-        favStockPrices: state.favStockPrices
+        // favStockPrices: state.favStockPrices
     };
 };
 
